@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "",
   "main": "index.js",
+  "bin": {
+    "workaholic": "./dist/cli.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -20,5 +23,14 @@
   "bugs": {
     "url": "https://github.com/edmundhung/workaholic/issues"
   },
-  "homepage": "https://github.com/edmundhung/workaholic#readme"
+  "homepage": "https://github.com/edmundhung/workaholic#readme",
+  "devDependencies": {
+    "@iarna/toml": "^2.2.5",
+    "esbuild": "^0.13.3",
+    "gray-matter": "^4.0.3",
+    "miniflare": "^1.4.1",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.4.3",
+    "yargs": "^17.2.1"
+  }
 }
