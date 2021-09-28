@@ -1,0 +1,24 @@
+{
+  "name": "@edmundhung/workaholic",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edmundhung/workaholic.git"
+  },
+  "keywords": [
+    "cloudflare",
+    "worker",
+    "kv"
+  ],
+  "author": "Edmund Hung <me@edmund.dev> (https://edmund.dev)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/edmundhung/workaholic/issues"
+  },
+  "homepage": "https://github.com/edmundhung/workaholic#readme"
+}
