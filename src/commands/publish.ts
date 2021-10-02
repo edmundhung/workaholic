@@ -1,4 +1,5 @@
 import TOML from '@iarna/toml';
+import { Command } from 'commander';
 import * as fs from 'fs/promises';
 
 async function publish(source: string, binding: string): Promise<void> {
@@ -36,22 +37,16 @@ async function publish(source: string, binding: string): Promise<void> {
   );
 }
 
-export const command = 'publish <data>';
+export default function makePublishCommand() {
+  const command = new Command('publish');
 
-export const describe = 'Publish kv data to Cloudflare';
+  command
+    .description('Publish kv data to Cloudflare')
+    .argument('<data>', 'data path')
+    .option('--binding <name>', 'wrangler binding name')
+    .action((data, binding) => {
+      publish(data, binding);
+    });
 
-export const builder = {
-  data: {
-    describe: 'data path',
-    type: 'string'
-  },
-  binding: {
-    describe: 'wrangler binding name',
-    type: 'string',
-    default: 'workaholic'
-  }
-};
-
-export async function handler(argv) {
-  await publish(argv.data, argv.binding);
+  return command;
 }

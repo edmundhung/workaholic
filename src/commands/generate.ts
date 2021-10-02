@@ -1,3 +1,4 @@
+import { Command } from 'commander';
 import * as fs from 'fs/promises';
 import matter from 'gray-matter';
 
@@ -32,17 +33,15 @@ async function generate(source: string, path = source): Promise<void> {
   process.stdout.write(JSON.stringify(entries, null, 2));
 }
 
-export const command = 'generate [source]';
+export default function makeGenerateCommand() {
+  const command = new Command('generate');
 
-export const describe = 'Generate worker kv data';
+  command
+    .description('Generate worker kv data')
+    .argument('[soruce]', 'source directory')
+    .action(source => {
+      generate(source);
+    });
 
-export const builder = {
-  source: {
-    describe: 'source directory',
-    type: 'string'
-  },
-};
-
-export async function handler(argv) {
-  await generate(argv.source);
+  return command;
 }

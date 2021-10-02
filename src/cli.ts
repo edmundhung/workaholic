@@ -1,9 +1,15 @@
 #!/usr/bin/env node
+import { Command } from 'commander';
+import makeGenerateCommand from './commands/generate';
+import makePreviewCommand from './commands/preview';
+import makePublishCommand from './commands/publish';
 
-import yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
-import commands from './commands';
+const program = new Command();
 
-yargs(hideBin(process.argv))
-  .command(commands)
-  .argv;
+program
+  .addCommand(makeGenerateCommand())
+  .addCommand(makePreviewCommand())
+  .addCommand(makePublishCommand())
+;
+
+program.parse();

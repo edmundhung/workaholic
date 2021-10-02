@@ -1,3 +1,4 @@
+import { Command } from 'commander';
 import * as fs from 'fs/promises';
 import { Miniflare } from 'miniflare';
 import rimraf from 'rimraf';
@@ -32,23 +33,16 @@ async function preview(source: string, binding: string): Promise<void> {
   console.log('[workaholic] KV persisted on Miniflare');
 }
 
+export default function makePreviewCommand() {
+  const command = new Command('preview');
 
-export const command = 'preview <data>';
+  command
+    .description('Persist data on miniflare')
+    .argument('<data>', 'data path')
+    .option('--binding <name>', 'wrangler binding name')
+    .action((data, binding) => {
+      preview(data, binding);
+    });
 
-export const describe = 'Persist data on miniflare';
-
-export const builder = {
-  data: {
-    describe: 'data path',
-    type: 'string'
-  },
-  binding: {
-    describe: 'wrangler binding name',
-    type: 'string',
-    default: 'workaholic'
-  }
-};
-
-export async function handler(argv) {
-  await preview(argv.data, argv.binding);
+  return command;
 }
