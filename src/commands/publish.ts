@@ -37,7 +37,7 @@ async function publish(source: string, binding: string): Promise<void> {
   );
 }
 
-export default function makePublishCommand() {
+export default function makePublishCommand(): Command {
   const command = new Command('publish');
 
   command

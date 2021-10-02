@@ -33,7 +33,7 @@ async function preview(source: string, binding: string): Promise<void> {
   console.log('[workaholic] KV persisted on Miniflare');
 }
 
-export default function makePreviewCommand() {
+export default function makePreviewCommand(): Command {
   const command = new Command('preview');
 
   command

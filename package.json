@@ -7,6 +7,7 @@
     "workaholic": "./dist/cli.js"
   },
   "scripts": {
+    "dev": "tsc -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

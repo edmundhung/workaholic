@@ -33,7 +33,7 @@ async function generate(source: string, path = source): Promise<void> {
   process.stdout.write(JSON.stringify(entries, null, 2));
 }
 
-export default function makeGenerateCommand() {
+export default function makeGenerateCommand(): Command {
   const command = new Command('generate');
 
   command
