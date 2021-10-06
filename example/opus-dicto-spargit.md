@@ -1,6 +1,6 @@
 ---
-title: Example markdown file
-description: Demonstrate how markdown file will be parsed by workaholic
+title: Opus dicto spargit rostro revertar osque
+description: Lorem markdownum lacertos. Despexit relicto quid ille norint rapidae error ipse alios, sub, nec bello urbe quam patriaque ponit
 ---
 
 # Opus dicto spargit rostro revertar osque
