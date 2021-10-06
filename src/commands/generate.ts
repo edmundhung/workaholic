@@ -3,36 +3,52 @@ import Fuse from 'fuse.js'
 import * as fs from 'fs/promises';
 import matter from 'gray-matter';
 
-async function parseFile(root: string, path: string): Promise<any> {
-  const content = await fs.readFile(path);
-  const result = matter(content.toString('utf8'));
+interface KV {
+  key: string;
+  value: any;
+  metadata?: any;
+}
+
+async function parseFile(root: string, path: string): Promise<KV> {
+  const content = await fs.readFile(path, { encoding: 'utf-8' });
+  const result = matter(content);
 
   return {
-    key: path.replace(new RegExp(`^${root}/`), '').replace(/\.md$/, ''),
+    key: `articles#${path.replace(new RegExp(`^${root}/`), '').replace(/\.md$/, '')}`,
     value: result.content ?? '',
     metadata: result.data ?? {},
   };
 }
 
-async function parseDirectory(source: string, path: string): Promise<any[]> {
-  let list = [];
+async function parseDirectory(source: string, path = source): Promise<KV[]> {
+  let entry: KV = {
+    key: `entries#${path.replace(new RegExp(`^${source}/`), '')}`,
+    value: [],
+  };
+  let list: KV[] = [entry];
+
 
   for (const dirent of await fs.readdir(path, { withFileTypes: true })) {
     if (dirent.isDirectory()) {
-      list.push(...(await parseDirectory(source, `${path}/${dirent.name}`)));
+      const [directoryEntry, ...articles] = await parseDirectory(source, `${path}/${dirent.name}`);
+
+      entry.value.push(...directoryEntry.value);
+      list.push(directoryEntry, ...articles);
     } else if (dirent.isFile()) {
-      list.push(await parseFile(source, `${path}/${dirent.name}`));
+      const article = await parseFile(source, `${path}/${dirent.name}`);
+
+      entry.value.push({ slug: article.key, metadata: article.metadata });
+      list.push(article);
     }
   }
 
   return list;
 }
 
-async function generate(source: string, path = source): Promise<void> {
-  const entries = await parseDirectory(source, path);
+function generateSearch(entry: KV) {
   const index = Fuse.createIndex([
     {
-      name: 'key',
+      name: 'slug',
       weight: 0.1
     },
     {
@@ -43,15 +59,22 @@ async function generate(source: string, path = source): Promise<void> {
       name: 'metadata.description',
       weight: 0.4
     },
-  ], entries);
+  ], entry.value);
 
-  const data = {
-    key: 'workaholic',
-    value: entries,
-    metadata: index.toJSON(),
+  return {
+    key: 'search',
+    value: {
+      index: index.toJSON(),
+      entries: entry.value,
+    },
   };
+}
 
-  process.stdout.write(JSON.stringify(data, null, 2));
+async function generate(source: string): Promise<void> {
+  const [entry, ...data] = await parseDirectory(source);
+  const search = generateSearch(entry);
+
+  process.stdout.write(JSON.stringify([search, ...data], null, 2));
 }
 
 export default function makeGenerateCommand(): Command {
