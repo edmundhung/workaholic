@@ -42,7 +42,7 @@ function createQuery(options: Fuse.IFuseOptions<Entry>, namespace: KVNamespace) 
       return namespace.get<Entry[]>(`entries#${prefix}`, 'json');
     },
     async get(slug: string): Promise<Article | null> {
-      const data = await namespace.getWithMetadata<Metadata>(`article#${slug}`, 'text');
+      const data = await namespace.getWithMetadata<Metadata>(`articles#${slug}`, 'text');
 
       if (!data.value && !data.metadata) {
         return null;
