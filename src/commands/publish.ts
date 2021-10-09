@@ -2,6 +2,7 @@ import TOML from '@iarna/toml';
 import { Command } from 'commander';
 import * as fs from 'fs/promises';
 import { Response } from 'miniflare';
+import fetch from 'node-fetch';
 
 async function getWranglerConfig() {
   const wrangler = await fs.readFile('../wrangler.toml', 'utf-8');
@@ -25,8 +26,6 @@ async function getWranglerConfig() {
 }
 
 export default async function publish(entries: string, { accountId, namespaceId, token }: { accountId: string, namespaceId: string, token: string }): Promise<Response> {
-  const fetch = (url: string, init?: any) =>
-    import('node-fetch').then(({ default: fetch }) => fetch(url, init));
   return fetch(
     `https://api.cloudflare.com/client/v4/accounts/${accountId}/storage/kv/namespaces/${namespaceId}/bulk`,
     {
