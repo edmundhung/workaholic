@@ -70,21 +70,23 @@ function generateSearch(entry: KV) {
   };
 }
 
-async function generate(source: string): Promise<void> {
+export default async function generate(source: string): Promise<void> {
   const [entry, ...data] = await parseDirectory(source);
   const search = generateSearch(entry);
 
-  process.stdout.write(JSON.stringify([search, ...data], null, 2));
+  return [search, ...data];
 }
 
-export default function makeGenerateCommand(): Command {
+export function makeGenerateCommand(): Command {
   const command = new Command('generate');
 
   command
     .description('Generate worker kv data')
     .argument('[soruce]', 'source directory')
-    .action(source => {
-      generate(source);
+    .action(async (source) => {
+      const entries = await generate(source);
+
+      process.stdout.write(JSON.stringify(entries, null, 2));
     });
 
   return command;
