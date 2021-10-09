@@ -2,8 +2,9 @@ import { Command } from 'commander';
 import * as fs from 'fs/promises';
 import { Miniflare } from 'miniflare';
 import rimraf from 'rimraf';
+import { Entry } from '../types';
 
-async function parseData(source: string): any[] {
+async function parseData(source: string): Entry[] {
   const content = await fs.readFile(source, 'utf-8');
   const entries = JSON.parse(content);
 
@@ -14,7 +15,7 @@ async function parseData(source: string): any[] {
   return entries;
 }
 
-export default async function preview(mf: Miniflare, entries: any[], binding: string): Promise<void> {
+export default async function preview(mf: Miniflare, entries: Entry[], binding: string): Promise<void> {
   const namespace = await mf.getKVNamespace(binding);
 
   await Promise.all(

@@ -1,45 +1,22 @@
 import Fuse from 'fuse.js';
+import type { Metadata, Search, Article, Reference } from './types';
 
-type Metadata = {
-  title: string;
-  description: string;
-  [key: string]: string | undefined;
-}
-
-interface Search {
-  entries: Entry[];
-  index: {
-    keys: readonly string[];
-    collection: Fuse.FuseIndexRecords;
-  };
-}
-
-interface Entry {
-  slug: string;
-  metadta: Metadata;
-};
-
-interface Article {
-  content: string | null;
-  metadata: Metadata | null;
-}
-
-function createQuery(options: Fuse.IFuseOptions<Entry>, namespace: KVNamespace) {
+function createQuery(options: Fuse.IFuseOptions<Reference>, namespace: KVNamespace) {
   return {
-    async search(keyword: string): Promise<Fuse.FuseResult<Entry>[]> {
+    async search(keyword: string): Promise<Fuse.FuseResult<Reference>[]> {
       const search = await namespace.get<Search>('search', 'json');
 
       if (!search) {
         throw new Error('[workaholic] Fails to get the `search` record from KV');
       }
 
-      const index = Fuse.parseIndex<Entry>(search.index)
-      const fuse = new Fuse<Entry>(search.entries, options, index);
+      const index = Fuse.parseIndex<Reference>(search.index)
+      const fuse = new Fuse<Reference>(search.references, options, index);
 
       return fuse.search(keyword);
     },
-    list(prefix: string): Promise<Entry[] | null> {
-      return namespace.get<Entry[]>(`entries#${prefix}`, 'json');
+    list(prefix: string): Promise<Reference[] | null> {
+      return namespace.get<Reference[]>(`entries#${prefix}`, 'json');
     },
     async get(slug: string): Promise<Article | null> {
       const data = await namespace.getWithMetadata<Metadata>(`articles#${slug}`, 'text');

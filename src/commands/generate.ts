@@ -2,14 +2,9 @@ import { Command } from 'commander';
 import Fuse from 'fuse.js'
 import * as fs from 'fs/promises';
 import matter from 'gray-matter';
+import { Entry } from '../types';
 
-interface KV {
-  key: string;
-  value: any;
-  metadata?: any;
-}
-
-async function parseFile(root: string, path: string): Promise<KV> {
+async function parseFile(root: string, path: string): Promise<Entry> {
   const content = await fs.readFile(path, { encoding: 'utf-8' });
   const result = matter(content);
 
@@ -20,7 +15,7 @@ async function parseFile(root: string, path: string): Promise<KV> {
   };
 }
 
-async function parseDirectory(source: string, path = source): Promise<KV[]> {
+async function parseDirectory(source: string, path = source): Promise<Entry[]> {
   let entry: KV = {
     key: `entries#${path.replace(new RegExp(`^${source}/`), '')}`,
     value: [],
@@ -45,7 +40,7 @@ async function parseDirectory(source: string, path = source): Promise<KV[]> {
   return list;
 }
 
-function generateSearch(entry: KV) {
+function generateSearch(entry: Entry) {
   const index = Fuse.createIndex([
     {
       name: 'slug',
@@ -65,7 +60,7 @@ function generateSearch(entry: KV) {
     key: 'search',
     value: {
       index: index.toJSON(),
-      entries: entry.value,
+      references: entry.value,
     },
   };
 }
