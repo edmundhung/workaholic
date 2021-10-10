@@ -14,8 +14,8 @@ function parse(value: string | undefined, type: string): unknown | null {
 
   try {
     switch (type) {
-      // case 'json':
-      //   return JSON.parse(value);
+      case 'json':
+        return JSON.parse(value);
       default:
         return value;
     }
