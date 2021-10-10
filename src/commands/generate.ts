@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import Fuse from 'fuse.js'
 import * as fs from 'fs/promises';
 import matter from 'gray-matter';
-import { Entry } from '../types';
+import { Entry, Reference } from '../types';
 
 async function parseFile(root: string, path: string): Promise<Entry> {
   const content = await fs.readFile(path, { encoding: 'utf-8' });
@@ -11,31 +11,33 @@ async function parseFile(root: string, path: string): Promise<Entry> {
   return {
     key: `articles#${path.replace(new RegExp(`^${root}/`), '').replace(/\.md$/, '')}`,
     value: result.content ?? '',
-    metadata: result.data ?? {},
+    metadata: result.data as any,
   };
 }
 
 async function parseDirectory(source: string, path = source): Promise<Entry[]> {
-  let entry: KV = {
-    key: `entries#${path.replace(new RegExp(`^${source}/`), '')}`,
-    value: [],
-  };
-  let list: KV[] = [entry];
+  let references: Reference[] = [];
+  let list: Entry[] = [];
 
 
   for (const dirent of await fs.readdir(path, { withFileTypes: true })) {
     if (dirent.isDirectory()) {
       const [directoryEntry, ...articles] = await parseDirectory(source, `${path}/${dirent.name}`);
 
-      entry.value.push(...directoryEntry.value);
+      references.push(...JSON.parse(directoryEntry.value));
       list.push(directoryEntry, ...articles);
     } else if (dirent.isFile()) {
       const article = await parseFile(source, `${path}/${dirent.name}`);
 
-      entry.value.push({ slug: article.key, metadata: article.metadata });
+      references.push({ slug: article.key, metadata: article.metadata ?? null });
       list.push(article);
     }
   }
+
+  list.unshift({
+    key: `entries#${path.replace(new RegExp(`^${source}/`), '')}`,
+    value: JSON.stringify(references),
+  });
 
   return list;
 }
@@ -54,18 +56,18 @@ function generateSearch(entry: Entry) {
       name: 'metadata.description',
       weight: 0.4
     },
-  ], entry.value);
+  ], JSON.parse(entry.value));
 
   return {
     key: 'search',
-    value: {
+    value: JSON.stringify({
       index: index.toJSON(),
-      references: entry.value,
-    },
+      references: JSON.parse(entry.value),
+    }),
   };
 }
 
-export default async function generate(source: string): Promise<void> {
+export default async function generate(source: string): Promise<Entry[]> {
   const [entry, ...data] = await parseDirectory(source);
   const search = generateSearch(entry);
 

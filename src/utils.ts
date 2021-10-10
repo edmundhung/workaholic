@@ -1,7 +1,8 @@
+import TOML from '@iarna/toml';
 import * as fs from 'fs/promises';
-import { Entry } from '../types';
+import { Entry } from './types';
 
-export async function parseData(source: string): Entry[] {
+export async function parseData(source: string): Promise<Entry[]> {
   let entries;
 
   const content = await fs.readFile(source, 'utf-8');
@@ -25,11 +26,11 @@ export async function getWranglerConfig() {
 
   return {
     getAccountId(): string {
-      return config['account_id'];
+      return config['account_id'].toString();
     },
     getNamespaceId(bindingName: string, preview: boolean): string | null {
       const kvNamespaces = (config['kv_namespaces'] ?? []) as any[];
-      const kv = kvNamespaces.find(namespace => namespace.binding === binding);
+      const kv = kvNamespaces.find(namespace => namespace.binding === bindingName);
 
       if (!kv) {
         return null;

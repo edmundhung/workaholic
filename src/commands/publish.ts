@@ -1,7 +1,5 @@
-import TOML from '@iarna/toml';
 import { Command } from 'commander';
-import { Response } from 'miniflare';
-import fetch from 'node-fetch';
+import fetch, { Response } from 'node-fetch';
 import { Entry } from '../types';
 import { parseData, getWranglerConfig } from '../utils';
 
@@ -27,12 +25,24 @@ export function makePublishCommand(): Command {
     .argument('<data>', 'data soruce')
     .option('--binding <name>', 'wrangler binding name')
     .action(async (source, bindingName) => {
-      const entries = await parseData(soruce);
+      const entries = await parseData(source);
       console.log('[workaholic] Reading config from wrangler.toml');
       const { getAccountId, getNamespaceId } = await getWranglerConfig();
       const accountId = getAccountId();
       const namespaceId = getNamespaceId(bindingName, process.env.NODE_ENV !== 'production');
-      console.log(`[workaholic] Updating KV with binding "${bindingName}" for account "${config['account_id']}" and namespace "${namespaceId}"`);
+      const token = process.env.CF_API_TOKEN;
+
+      if (!namespaceId) {
+        console.log(`[workaholic] Environemnt variable CF_API_TOKEN is missing;`)
+        return;
+      }
+
+      if (!token) {
+        console.log(`[workaholic] Environemnt variable CF_API_TOKEN is missing;`)
+        return;
+      }
+
+      console.log(`[workaholic] Updating KV with binding "${bindingName}" for account "${accountId}" and namespace "${namespaceId}"`);
       const response = await publish(entries, { accountId, namespaceId, token });
       const result = await response.text();
       console.log(`[workaholic] Update finish with status ${response.status} and result ${result}`);

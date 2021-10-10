@@ -6,9 +6,12 @@
     "strict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "rootDir": "src",
-    "outDir": "dist",
+    "rootDir": "./src",
+    "outDir": "./dist",
     "declaration": true,
     "skipLibCheck": true,
   },
+  "include": [
+    "./src/**/*.ts"
+  ]
 }
