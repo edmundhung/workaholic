@@ -1,19 +1,8 @@
 import { Command } from 'commander';
-import * as fs from 'fs/promises';
 import { Miniflare } from 'miniflare';
 import rimraf from 'rimraf';
 import { Entry } from '../types';
-
-async function parseData(source: string): Entry[] {
-  const content = await fs.readFile(source, 'utf-8');
-  const entries = JSON.parse(content);
-
-  if (!Array.isArray(entries)) {
-    throw new Error('[workaholic] source json must be an array');
-  }
-
-  return entries;
-}
+import { parseData } from '../utils';
 
 export default async function preview(mf: Miniflare, entries: Entry[], binding: string): Promise<void> {
   const namespace = await mf.getKVNamespace(binding);
