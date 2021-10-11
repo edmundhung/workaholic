@@ -2,32 +2,32 @@ import { Command } from 'commander';
 import Fuse from 'fuse.js'
 import * as fs from 'fs/promises';
 import matter from 'gray-matter';
+import path from 'path';
 import { Entry, Reference } from '../types';
 
-async function parseFile(root: string, path: string): Promise<Entry> {
-  const content = await fs.readFile(path, { encoding: 'utf-8' });
+async function parseFile(root: string, filePath: string): Promise<Entry> {
+  const content = await fs.readFile(filePath, { encoding: 'utf-8' });
   const result = matter(content);
 
   return {
-    key: `articles#${path.replace(new RegExp(`^${root}/`), '').replace(/\.md$/, '')}`,
+    key: `articles/${path.relative(root, filePath).replace(/\.md$/, '')}`,
     value: result.content ?? '',
     metadata: result.data as any,
   };
 }
 
-async function parseDirectory(source: string, path = source): Promise<Entry[]> {
+async function parseDirectory(source: string, directoryPath = source): Promise<Entry[]> {
   let references: Reference[] = [];
   let list: Entry[] = [];
 
-
-  for (const dirent of await fs.readdir(path, { withFileTypes: true })) {
+  for (const dirent of await fs.readdir(directoryPath, { withFileTypes: true })) {
     if (dirent.isDirectory()) {
-      const [directoryEntry, ...articles] = await parseDirectory(source, `${path}/${dirent.name}`);
+      const [directoryEntry, ...articles] = await parseDirectory(source, `${directoryPath}/${dirent.name}`);
 
       references.push(...JSON.parse(directoryEntry.value));
       list.push(directoryEntry, ...articles);
     } else if (dirent.isFile()) {
-      const article = await parseFile(source, `${path}/${dirent.name}`);
+      const article = await parseFile(source, `${directoryPath}/${dirent.name}`);
 
       references.push({ slug: article.key, metadata: article.metadata ?? null });
       list.push(article);
@@ -35,7 +35,7 @@ async function parseDirectory(source: string, path = source): Promise<Entry[]> {
   }
 
   list.unshift({
-    key: `entries#${path.replace(new RegExp(`^${source}/`), '')}`,
+    key: `references/${path.relative(source, directoryPath)}`,
     value: JSON.stringify(references),
   });
 
@@ -68,10 +68,10 @@ function generateSearch(entry: Entry) {
 }
 
 export default async function generate(source: string): Promise<Entry[]> {
-  const [entry, ...data] = await parseDirectory(source);
-  const search = generateSearch(entry);
+  const entries = await parseDirectory(source);
+  const search = generateSearch(entries[0]);
 
-  return [search, ...data];
+  return [search, ...entries];
 }
 
 export function makeGenerateCommand(): Command {

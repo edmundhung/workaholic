@@ -16,10 +16,10 @@ function createQuery(options: Fuse.IFuseOptions<Reference>, namespace: KVNamespa
       return fuse.search(keyword);
     },
     list(prefix: string): Promise<Reference[] | null> {
-      return namespace.get<Reference[]>(`entries#${prefix}`, 'json');
+      return namespace.get<Reference[]>(`references/${prefix}`, 'json');
     },
     async get(slug: string): Promise<Article | null> {
-      const data = await namespace.getWithMetadata<Metadata>(`articles#${slug}`, 'text');
+      const data = await namespace.getWithMetadata<Metadata>(`articles/${slug}`, 'text');
 
       if (!data.value && !data.metadata) {
         return null;

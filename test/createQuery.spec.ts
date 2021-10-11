@@ -61,7 +61,7 @@ describe('createQuery', () => {
   it('handles the get query properly', async () => {
     const query = createQuery({}, namespace);
     const resolveFixture = (slug: string) => {
-      const kv = fixtures.find(kv => kv.key === `articles#${slug}`);
+      const kv = fixtures.find(kv => kv.key === `articles/${slug}`);
 
       return {
         content: kv?.value ?? null,
@@ -77,7 +77,7 @@ describe('createQuery', () => {
   it('handles the list query properly', async () => {
     const query = createQuery({}, namespace);
     const resolveFixture = (slug: string) => {
-      const kv = fixtures.find(kv => kv.key === `articles#${slug}`);
+      const kv = fixtures.find(kv => kv.key === `articles/${slug}`);
 
       return {
         slug: kv?.key,
