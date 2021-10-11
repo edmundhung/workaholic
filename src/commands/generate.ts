@@ -40,6 +40,15 @@ async function parseFile(root: string, filePath: string): Promise<Entry> {
         metadata: metadata,
       };
     }
+    case '.json': {
+      const { metadata, ...data } = JSON.parse(content);
+
+      return {
+        key: key.replace(/\.json$/, ''),
+        value: JSON.stringify(data),
+        metadata: metadata,
+      };
+    }
     default:
       throw new Error(`Unsupported file extension: ${extension}`);
   }
