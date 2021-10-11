@@ -6,13 +6,33 @@ import { Entry, Reference } from '../types';
 
 async function parseFile(root: string, filePath: string): Promise<Entry> {
   const content = await fs.readFile(filePath, { encoding: 'utf-8' });
-  const result = matter(content);
+  const extension = path.extname(filePath);
+  const key = `articles/${path.relative(root, filePath)}`;
 
-  return {
-    key: `articles/${path.relative(root, filePath).replace(/\.md$/, '')}`,
-    value: result.content ?? '',
-    metadata: result.data as any,
-  };
+  switch (extension) {
+    case '.md': {
+      const result = matter(content);
+
+      return {
+        key: key.replace(/\.md$/, ''),
+        value: result.content ?? '',
+        metadata: result.data as any,
+      };
+    }
+    case '.yaml':
+    case '.yml': {
+      const result = matter(['---', content, '---'].join('\n'));
+      const { metadata, ...data } = result.data;
+
+      return {
+        key: key.replace(/\.yaml$/, ''),
+        value: JSON.stringify(data),
+        metadata: metadata,
+      };
+    }
+    default:
+      throw new Error(`Unsupported file extension: ${extension}`);
+  }
 }
 
 async function parseDirectory(source: string, directoryPath = source): Promise<Entry[]> {
