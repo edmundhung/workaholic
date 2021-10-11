@@ -10,11 +10,6 @@ export interface Entry {
   metadata?: Metadata;
 }
 
-export interface Search {
-  references: Reference[];
-  index: any;
-}
-
 export interface Reference {
   slug: string;
   metadata: Metadata | null;

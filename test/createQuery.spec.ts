@@ -51,15 +51,14 @@ describe('createQuery', () => {
   const namespace = createNamespace(fixtures);
 
   it('creates 3 different queries', () => {
-    const query = createQuery({}, namespace);
+    const query = createQuery(namespace);
 
-    expect(query).toHaveProperty('search');
     expect(query).toHaveProperty('list');
     expect(query).toHaveProperty('get');
   });
 
   it('handles the get query properly', async () => {
-    const query = createQuery({}, namespace);
+    const query = createQuery(namespace);
     const resolveFixture = (slug: string) => {
       const kv = fixtures.find(kv => kv.key === `articles/${slug}`);
 
@@ -75,7 +74,7 @@ describe('createQuery', () => {
   });
 
   it('handles the list query properly', async () => {
-    const query = createQuery({}, namespace);
+    const query = createQuery(namespace);
     const resolveFixture = (slug: string) => {
       const kv = fixtures.find(kv => kv.key === `articles/${slug}`);
 

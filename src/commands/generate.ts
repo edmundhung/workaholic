@@ -1,5 +1,4 @@
 import { Command } from 'commander';
-import Fuse from 'fuse.js'
 import * as fs from 'fs/promises';
 import matter from 'gray-matter';
 import path from 'path';
@@ -42,36 +41,10 @@ async function parseDirectory(source: string, directoryPath = source): Promise<E
   return list;
 }
 
-function generateSearch(entry: Entry) {
-  const index = Fuse.createIndex([
-    {
-      name: 'slug',
-      weight: 0.1
-    },
-    {
-      name: 'metadata.title',
-      weight: 0.5
-    },
-    {
-      name: 'metadata.description',
-      weight: 0.4
-    },
-  ], JSON.parse(entry.value));
-
-  return {
-    key: 'search',
-    value: JSON.stringify({
-      index: index.toJSON(),
-      references: JSON.parse(entry.value),
-    }),
-  };
-}
-
 export default async function generate(source: string): Promise<Entry[]> {
   const entries = await parseDirectory(source);
-  const search = generateSearch(entries[0]);
 
-  return [search, ...entries];
+  return entries;
 }
 
 export function makeGenerateCommand(): Command {
