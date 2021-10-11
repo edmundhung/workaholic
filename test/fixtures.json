@@ -1,11 +1,11 @@
 [
   {
     "key": "references/",
-    "value": "[{\"slug\":\"articles/bar/de-hostis-habetur\",\"metadata\":{\"title\":\"De hostis habetur\",\"description\":\"Lorem markdownum Laurentes tangor imagine, pallet lacertos ipsius cornua amantibus cum non taceam, post stagnata\"}},{\"slug\":\"articles/bar/inferiusque-peti\",\"metadata\":{\"title\":\"Inferiusque peti\",\"description\":\"Lorem markdownum comitum *gemunt intexto*, in nympharum committi absensauxilium formosa cantare. Tibi triste *si adsonat* patriae locorum madefacta errorem.\"}},{\"slug\":\"articles/bar/mulcet-vincere\",\"metadata\":{\"title\":\"Mulcet vincere\",\"description\":\"Lorem markdownum gentemque incerti, genibus? In Pelion est\"}},{\"slug\":\"articles/foo/reditum-quater\",\"metadata\":{\"title\":\"Reditum quater\",\"description\":\"Lorem markdownum infirmis adhuc; tenebas sequi, tempora quoque, *anne vires illa. Aures mecumque gratissima fores avus norint ponto tuas mandata opem, sollicitat infera vitulos Phaeocomes latentes platanus de\"}},{\"slug\":\"articles/foo/versa-colebatur\",\"metadata\":{\"title\":\"Versa colebatur\",\"description\":\"Lorem markdownum, toto dixit timidae tactae, nata dixisse, nunc\"}},{\"slug\":\"articles/gemitus-inplicuit\",\"metadata\":{\"title\":\"Gemitus inplicuit\",\"description\":\"Lorem markdownum incubat quisquis vitale aglauros patriae putat arva tua illi,\\nHaemoniam terris stantem **per** amantem; sub. Non quaesitus infelix, senes\\ngloria et innuba caelestibus et deorum lacerto ratos Minervam, per gaudia.\\nCircumlita quam: trepida, **diu famulus** colla donec puer pulveris notum finita\\net ponit.\\n\"}},{\"slug\":\"articles/mensis-quam-timori\",\"metadata\":{\"title\":\"Mensis quam timori\",\"description\":\"Lorem markdownum timidumque putat. Ipse **reddit aderat luctus** enim tutam semine Tiberinaque oppositas non adhuc metaque ferant\"}},{\"slug\":\"articles/opus-dicto-spargit\",\"metadata\":{\"title\":\"Opus dicto spargit rostro revertar osque\",\"description\":\"Lorem markdownum lacertos. Despexit relicto quid ille norint rapidae error ipse alios, sub, nec bello urbe quam patriaque ponit\"}}]"
+    "value": "[{\"slug\":\"articles/bar/de-hostis-habetur\",\"metadata\":{\"title\":\"De hostis habetur\",\"description\":\"Lorem markdownum Laurentes tangor imagine, pallet lacertos ipsius cornua amantibus cum non taceam, post stagnata\"}},{\"slug\":\"articles/bar/mulcet-vincere\",\"metadata\":{\"title\":\"Mulcet vincere\",\"description\":\"Lorem markdownum gentemque incerti, genibus? In Pelion est\"}},{\"slug\":\"articles/foo/reditum-quater\",\"metadata\":{\"title\":\"Reditum quater\",\"description\":\"Lorem markdownum infirmis adhuc; tenebas sequi, tempora quoque, *anne vires illa. Aures mecumque gratissima fores avus norint ponto tuas mandata opem, sollicitat infera vitulos Phaeocomes latentes platanus de\"}},{\"slug\":\"articles/foo/versa-colebatur\",\"metadata\":{\"title\":\"Versa colebatur\",\"description\":\"Lorem markdownum, toto dixit timidae tactae, nata dixisse, nunc\"}},{\"slug\":\"articles/gemitus-inplicuit\",\"metadata\":{\"title\":\"Gemitus inplicuit\",\"description\":\"Lorem markdownum incubat quisquis vitale aglauros patriae putat arva tua illi,\\nHaemoniam terris stantem **per** amantem; sub. Non quaesitus infelix, senes\\ngloria et innuba caelestibus et deorum lacerto ratos Minervam, per gaudia.\\nCircumlita quam: trepida, **diu famulus** colla donec puer pulveris notum finita\\net ponit.\\n\"}},{\"slug\":\"articles/inferiusque-peti\",\"metadata\":{\"title\":\"Inferiusque peti\",\"description\":\"Lorem markdownum comitum *gemunt intexto*, in nympharum committi absensauxilium formosa cantare. Tibi triste *si adsonat* patriae locorum madefacta errorem.\"}},{\"slug\":\"articles/mensis-quam-timori\",\"metadata\":{\"title\":\"Mensis quam timori\",\"description\":\"Lorem markdownum timidumque putat. Ipse **reddit aderat luctus** enim tutam semine Tiberinaque oppositas non adhuc metaque ferant\"}},{\"slug\":\"articles/opus-dicto-spargit\",\"metadata\":{\"title\":\"Opus dicto spargit rostro revertar osque\",\"description\":\"Lorem markdownum lacertos. Despexit relicto quid ille norint rapidae error ipse alios, sub, nec bello urbe quam patriaque ponit\"}}]"
   },
   {
     "key": "references/bar",
-    "value": "[{\"slug\":\"articles/bar/de-hostis-habetur\",\"metadata\":{\"title\":\"De hostis habetur\",\"description\":\"Lorem markdownum Laurentes tangor imagine, pallet lacertos ipsius cornua amantibus cum non taceam, post stagnata\"}},{\"slug\":\"articles/bar/inferiusque-peti\",\"metadata\":{\"title\":\"Inferiusque peti\",\"description\":\"Lorem markdownum comitum *gemunt intexto*, in nympharum committi absensauxilium formosa cantare. Tibi triste *si adsonat* patriae locorum madefacta errorem.\"}},{\"slug\":\"articles/bar/mulcet-vincere\",\"metadata\":{\"title\":\"Mulcet vincere\",\"description\":\"Lorem markdownum gentemque incerti, genibus? In Pelion est\"}}]"
+    "value": "[{\"slug\":\"articles/bar/de-hostis-habetur\",\"metadata\":{\"title\":\"De hostis habetur\",\"description\":\"Lorem markdownum Laurentes tangor imagine, pallet lacertos ipsius cornua amantibus cum non taceam, post stagnata\"}},{\"slug\":\"articles/bar/mulcet-vincere\",\"metadata\":{\"title\":\"Mulcet vincere\",\"description\":\"Lorem markdownum gentemque incerti, genibus? In Pelion est\"}}]"
   },
   {
     "key": "articles/bar/de-hostis-habetur",
@@ -13,14 +13,6 @@
     "metadata": {
       "title": "De hostis habetur",
       "description": "Lorem markdownum Laurentes tangor imagine, pallet lacertos ipsius cornua amantibus cum non taceam, post stagnata"
-    }
-  },
-  {
-    "key": "articles/bar/inferiusque-peti",
-    "value": "{\"owner\":{\"name\":\"Tom Preston-Werner\",\"dob\":\"1979-05-27T15:32:00.000Z\"},\"database\":{\"enabled\":true,\"ports\":[8000,8001,8002],\"data\":[[\"delta\",\"phi\"],[3.14]],\"temp_targets\":{\"cpu\":79.5,\"case\":72}},\"servers\":{\"alpha\":{\"ip\":\"10.0.0.1\",\"role\":\"frontend\"},\"beta\":{\"ip\":\"10.0.0.2\",\"role\":\"backend\"}}}",
-    "metadata": {
-      "title": "Inferiusque peti",
-      "description": "Lorem markdownum comitum *gemunt intexto*, in nympharum committi absensauxilium formosa cantare. Tibi triste *si adsonat* patriae locorum madefacta errorem."
     }
   },
   {
@@ -57,6 +49,14 @@
     "metadata": {
       "title": "Gemitus inplicuit",
       "description": "Lorem markdownum incubat quisquis vitale aglauros patriae putat arva tua illi,\nHaemoniam terris stantem **per** amantem; sub. Non quaesitus infelix, senes\ngloria et innuba caelestibus et deorum lacerto ratos Minervam, per gaudia.\nCircumlita quam: trepida, **diu famulus** colla donec puer pulveris notum finita\net ponit.\n"
+    }
+  },
+  {
+    "key": "articles/inferiusque-peti",
+    "value": "{\"owner\":{\"name\":\"Tom Preston-Werner\",\"dob\":\"1979-05-27T15:32:00.000Z\"},\"database\":{\"enabled\":true,\"ports\":[8000,8001,8002],\"data\":[[\"delta\",\"phi\"],[3.14]],\"temp_targets\":{\"cpu\":79.5,\"case\":72}},\"servers\":{\"alpha\":{\"ip\":\"10.0.0.1\",\"role\":\"frontend\"},\"beta\":{\"ip\":\"10.0.0.2\",\"role\":\"backend\"}}}",
+    "metadata": {
+      "title": "Inferiusque peti",
+      "description": "Lorem markdownum comitum *gemunt intexto*, in nympharum committi absensauxilium formosa cantare. Tibi triste *si adsonat* patriae locorum madefacta errorem."
     }
   },
   {
