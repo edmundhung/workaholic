@@ -1,3 +1,4 @@
+import TOML from '@iarna/toml';
 import { Command } from 'commander';
 import * as fs from 'fs/promises';
 import matter from 'gray-matter';
@@ -26,6 +27,15 @@ async function parseFile(root: string, filePath: string): Promise<Entry> {
 
       return {
         key: key.replace(/\.yaml$/, ''),
+        value: JSON.stringify(data),
+        metadata: metadata,
+      };
+    }
+    case '.toml': {
+      const { metadata, ...data } = TOML.parse(content);
+
+      return {
+        key: key.replace(/\.toml$/, ''),
         value: JSON.stringify(data),
         metadata: metadata,
       };
