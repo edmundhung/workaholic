@@ -85,6 +85,10 @@ describe('createQuery', () => {
     };
 
     expect(await query.list('bar')).toEqual([resolveFixture('bar/de-hostis-habetur'), resolveFixture('bar/mulcet-vincere')]);
+    expect(await query.list('bar', true)).toEqual([resolveFixture('bar/de-hostis-habetur'), resolveFixture('bar/mulcet-vincere')]);
     expect(await query.list('foo')).toEqual([resolveFixture('foo/reditum-quater'), resolveFixture('foo/versa-colebatur')]);
+    expect(await query.list('foo', true)).toEqual([resolveFixture('foo/reditum-quater'), resolveFixture('foo/versa-colebatur')]);
+    expect(await query.list('')).toEqual([resolveFixture('gemitus-inplicuit'), resolveFixture('inferiusque-peti'), resolveFixture('mensis-quam-timori'), resolveFixture('opus-dicto-spargit')]);
+    expect(await query.list('', true)).toEqual([resolveFixture('bar/de-hostis-habetur'), resolveFixture('bar/mulcet-vincere'), resolveFixture('foo/reditum-quater'), resolveFixture('foo/versa-colebatur'), resolveFixture('gemitus-inplicuit'), resolveFixture('inferiusque-peti'), resolveFixture('mensis-quam-timori'), resolveFixture('opus-dicto-spargit')]);
   });
 });
