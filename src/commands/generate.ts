@@ -37,7 +37,7 @@ async function parseFile(root: string, filePath: string): Promise<Entry> {
       return {
         key: key.replace(/\.toml$/, ''),
         value: JSON.stringify(data),
-        metadata: metadata,
+        metadata: metadata as any,
       };
     }
     case '.json': {

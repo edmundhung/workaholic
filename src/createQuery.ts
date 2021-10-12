@@ -9,7 +9,7 @@ function createQuery(namespace: KVNamespace) {
         return references;
       }
 
-      return references.filter(ref => !ref.slug.replace(prefix !== '' ? `articles/${prefix}/` : 'articles/', '').includes('/'));
+      return references?.filter(ref => !ref.slug.replace(prefix !== '' ? `articles/${prefix}/` : 'articles/', '').includes('/')) ?? null;
     },
     async getArticle(slug: string): Promise<Article | null> {
       const data = await namespace.getWithMetadata<Metadata>(`articles/${slug}`, 'text');
