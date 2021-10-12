@@ -53,8 +53,8 @@ describe('createQuery', () => {
   it('creates 3 different queries', () => {
     const query = createQuery(namespace);
 
-    expect(query).toHaveProperty('list');
-    expect(query).toHaveProperty('get');
+    expect(query).toHaveProperty('listReferences');
+    expect(query).toHaveProperty('getArticle');
   });
 
   it('handles the get query properly', async () => {
@@ -68,9 +68,9 @@ describe('createQuery', () => {
       };
     };
 
-    expect(await query.get('opus-dicto-spargit')).toEqual(resolveFixture('opus-dicto-spargit'));
-    expect(await query.get('bar/de-hostis-habetur')).toEqual(resolveFixture('bar/de-hostis-habetur'));
-    expect(await query.get('foo/reditum-quater')).toEqual(resolveFixture('foo/reditum-quater'));
+    expect(await query.getArticle('opus-dicto-spargit')).toEqual(resolveFixture('opus-dicto-spargit'));
+    expect(await query.getArticle('bar/de-hostis-habetur')).toEqual(resolveFixture('bar/de-hostis-habetur'));
+    expect(await query.getArticle('foo/reditum-quater')).toEqual(resolveFixture('foo/reditum-quater'));
   });
 
   it('handles the list query properly', async () => {
@@ -84,11 +84,11 @@ describe('createQuery', () => {
       };
     };
 
-    expect(await query.list('bar')).toEqual([resolveFixture('bar/de-hostis-habetur'), resolveFixture('bar/mulcet-vincere')]);
-    expect(await query.list('bar', true)).toEqual([resolveFixture('bar/de-hostis-habetur'), resolveFixture('bar/mulcet-vincere')]);
-    expect(await query.list('foo')).toEqual([resolveFixture('foo/reditum-quater'), resolveFixture('foo/versa-colebatur')]);
-    expect(await query.list('foo', true)).toEqual([resolveFixture('foo/reditum-quater'), resolveFixture('foo/versa-colebatur')]);
-    expect(await query.list('')).toEqual([resolveFixture('gemitus-inplicuit'), resolveFixture('inferiusque-peti'), resolveFixture('mensis-quam-timori'), resolveFixture('opus-dicto-spargit')]);
-    expect(await query.list('', true)).toEqual([resolveFixture('bar/de-hostis-habetur'), resolveFixture('bar/mulcet-vincere'), resolveFixture('foo/reditum-quater'), resolveFixture('foo/versa-colebatur'), resolveFixture('gemitus-inplicuit'), resolveFixture('inferiusque-peti'), resolveFixture('mensis-quam-timori'), resolveFixture('opus-dicto-spargit')]);
+    expect(await query.listReferences('bar')).toEqual([resolveFixture('bar/de-hostis-habetur'), resolveFixture('bar/mulcet-vincere')]);
+    expect(await query.listReferences('bar', true)).toEqual([resolveFixture('bar/de-hostis-habetur'), resolveFixture('bar/mulcet-vincere')]);
+    expect(await query.listReferences('foo')).toEqual([resolveFixture('foo/reditum-quater'), resolveFixture('foo/versa-colebatur')]);
+    expect(await query.listReferences('foo', true)).toEqual([resolveFixture('foo/reditum-quater'), resolveFixture('foo/versa-colebatur')]);
+    expect(await query.listReferences('')).toEqual([resolveFixture('gemitus-inplicuit'), resolveFixture('inferiusque-peti'), resolveFixture('mensis-quam-timori'), resolveFixture('opus-dicto-spargit')]);
+    expect(await query.listReferences('', true)).toEqual([resolveFixture('bar/de-hostis-habetur'), resolveFixture('bar/mulcet-vincere'), resolveFixture('foo/reditum-quater'), resolveFixture('foo/versa-colebatur'), resolveFixture('gemitus-inplicuit'), resolveFixture('inferiusque-peti'), resolveFixture('mensis-quam-timori'), resolveFixture('opus-dicto-spargit')]);
   });
 });
