@@ -1,12 +1,12 @@
 import TOML from '@iarna/toml';
 import { Command } from 'commander';
-import * as fs from 'fs/promises';
+import fs from 'fs';
 import matter from 'gray-matter';
 import path from 'path';
 import { Entry, Reference } from '../types';
 
 async function parseFile(root: string, filePath: string): Promise<Entry> {
-  const content = await fs.readFile(filePath, { encoding: 'utf-8' });
+  const content = await fs.promises.readFile(filePath, { encoding: 'utf-8' });
   const extension = path.extname(filePath);
   const key = `articles/${path.relative(root, filePath)}`;
 
@@ -58,7 +58,7 @@ async function parseDirectory(source: string, directoryPath = source): Promise<E
   let references: Reference[] = [];
   let list: Entry[] = [];
 
-  for (const dirent of await fs.readdir(directoryPath, { withFileTypes: true })) {
+  for (const dirent of await fs.promises.readdir(directoryPath, { withFileTypes: true })) {
     if (dirent.isDirectory()) {
       const [directoryEntry, ...articles] = await parseDirectory(source, `${directoryPath}/${dirent.name}`);
 

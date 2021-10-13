@@ -1,11 +1,11 @@
 import TOML from '@iarna/toml';
-import * as fs from 'fs/promises';
+import fs from 'fs';
 import { Entry } from './types';
 
 export async function parseData(source: string): Promise<Entry[]> {
   let entries;
 
-  const content = await fs.readFile(source, 'utf-8');
+  const content = await fs.promises.readFile(source, 'utf-8');
 
   try {
     entries = JSON.parse(content);
@@ -21,7 +21,7 @@ export async function parseData(source: string): Promise<Entry[]> {
 }
 
 export async function getWranglerConfig() {
-  const wrangler = await fs.readFile('../wrangler.toml', 'utf-8');
+  const wrangler = await fs.promises.readFile('../wrangler.toml', 'utf-8');
   const config = TOML.parse(wrangler);
 
   return {
