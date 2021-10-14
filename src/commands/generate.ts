@@ -4,11 +4,12 @@ import fs from 'fs';
 import matter from 'gray-matter';
 import path from 'path';
 import { Entry, Reference } from '../types';
+import { getRelativePath } from '../utils';
 
 async function parseFile(root: string, filePath: string): Promise<Entry> {
   const content = await fs.promises.readFile(filePath, { encoding: 'utf-8' });
   const extension = path.extname(filePath);
-  const key = `articles/${path.relative(root, filePath)}`;
+  const key = `articles/${getRelativePath(root, filePath)}`;
 
   switch (extension) {
     case '.md': {
@@ -73,7 +74,7 @@ async function parseDirectory(source: string, directoryPath = source): Promise<E
   }
 
   list.unshift({
-    key: `references/${path.relative(source, directoryPath)}`,
+    key: `references/${getRelativePath(source, directoryPath)}`,
     value: JSON.stringify(references),
   });
 

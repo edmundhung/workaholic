@@ -2,6 +2,10 @@ import TOML from '@iarna/toml';
 import fs from 'fs';
 import { Entry } from './types';
 
+export function getRelativePath(source: string, target: string): string {
+  return target.replace(source, '').replace(/^\//, '');
+}
+
 export async function parseData(source: string): Promise<Entry[]> {
   let entries;
 
