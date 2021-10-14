@@ -17,7 +17,7 @@ async function parseFile(root: string, filePath: string): Promise<Entry> {
 
       return {
         key: key.replace(/\.md$/, ''),
-        value: result.content ?? '',
+        value: result.content?.replace(/\r/g, '') ?? '',
         metadata: result.data as any,
       };
     }
