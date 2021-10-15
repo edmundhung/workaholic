@@ -1,7 +1,7 @@
-import type { Metadata, Article, Reference } from './types';
+import type { Metadata, Article, Reference, Query } from './types';
 import { getRelativePath } from './utils';
 
-function createQuery(namespace: KVNamespace) {
+function createQuery(namespace: KVNamespace): Query {
   return {
     async listReferences(prefix: string, includeSubfolders = false): Promise<Reference[] | null> {
       const references = await namespace.get<Reference[]>(`references/${prefix}`, 'json');

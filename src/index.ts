@@ -1,11 +1,13 @@
-import createQuery from "./createQuery";
-import generate from "./commands/generate";
-import preview from "./commands/preview";
-import publish from "./commands/publish";
+import createQuery from './createQuery';
+
+export type {
+  Metadata,
+  Entry,
+  Reference,
+  Article,
+  Query,
+} from './types';
 
 export {
   createQuery,
-  generate,
-  preview,
-  publish,
 };

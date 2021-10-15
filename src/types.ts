@@ -17,3 +17,8 @@ export interface Article {
   content: string | null;
   metadata: Metadata | null;
 }
+
+export interface Query {
+  listReferences(prefix: string, includeSubfolders: boolean): Promise<Reference[] | null>;
+  getArticle(slug: string): Promise<Article | null>;
+}
