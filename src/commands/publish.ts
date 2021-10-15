@@ -24,12 +24,12 @@ export function makePublishCommand(): Command {
     .description('Publish kv data to Cloudflare')
     .argument('<data>', 'data soruce')
     .option('--binding <name>', 'wrangler binding name')
-    .action(async (source, bindingName) => {
+    .action(async (source, options) => {
       const entries = await parseData(source);
       console.log('[workaholic] Reading config from wrangler.toml');
       const { getAccountId, getNamespaceId } = await getWranglerConfig();
       const accountId = getAccountId();
-      const namespaceId = getNamespaceId(bindingName, process.env.NODE_ENV !== 'production');
+      const namespaceId = getNamespaceId(options.binding, process.env.NODE_ENV !== 'production');
       const token = process.env.CF_API_TOKEN;
 
       if (!namespaceId) {
@@ -42,7 +42,7 @@ export function makePublishCommand(): Command {
         return;
       }
 
-      console.log(`[workaholic] Updating KV with binding "${bindingName}" for account "${accountId}" and namespace "${namespaceId}"`);
+      console.log(`[workaholic] Updating KV with binding "${options.binding}" for account "${accountId}" and namespace "${namespaceId}"`);
       const response = await publish(entries, { accountId, namespaceId, token });
       const result = await response.text();
       console.log(`[workaholic] Update finish with status ${response.status} and result ${result}`);

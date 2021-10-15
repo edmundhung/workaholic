@@ -21,7 +21,7 @@ export function makePreviewCommand(): Command {
     .description('Persist data on miniflare')
     .argument('<data>', 'data soruce')
     .option('--binding <name>', 'wrangler binding name')
-    .action(async (source, bindingName) => {
+    .action(async (source, options) => {
       console.log('[workaholic] Empty ./.mf/kv');
       rimraf.sync('./.mf/kv');
       console.log('[workaholic] Cleanup done');
@@ -34,7 +34,7 @@ export function makePreviewCommand(): Command {
       });
 
       const entries = await parseData(source);
-      await preview(mf, entries, bindingName);
+      await preview(mf, entries, options.binding);
       console.log('[workaholic] KV persisted on Miniflare');
     });
 
