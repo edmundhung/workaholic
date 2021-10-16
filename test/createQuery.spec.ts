@@ -46,7 +46,7 @@ describe('createQuery', () => {
       const kv = fixtures.find(kv => kv.key === `articles/${slug}`);
 
       return {
-        slug: kv?.key,
+        slug: kv?.key.replace(/^articles\//, ''),
         metadata: kv?.metadata ?? null,
       };
     };

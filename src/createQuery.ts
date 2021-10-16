@@ -1,5 +1,4 @@
 import type { Metadata, Article, Reference, Query } from './types';
-import { getRelativePath } from './utils';
 
 function createQuery(namespace: KVNamespace): Query {
   return {
@@ -14,7 +13,9 @@ function createQuery(namespace: KVNamespace): Query {
         return references;
       }
 
-      return references.filter(ref => !getRelativePath(`articles/${prefix}`, ref.slug).includes('/'));
+      const level = prefix !== '' ? prefix.split('/').length : 0;
+
+      return references.filter(ref => ref.slug.split('/').length === level + 1);
     },
     async getArticle(slug: string): Promise<Article | null> {
       const data = await namespace.getWithMetadata<Metadata>(`articles/${slug}`, 'text');

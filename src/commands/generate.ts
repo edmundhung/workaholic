@@ -68,7 +68,7 @@ async function parseDirectory(source: string, directoryPath = source): Promise<E
     } else if (dirent.isFile()) {
       const article = await parseFile(source, `${directoryPath}/${dirent.name}`);
 
-      references.push({ slug: article.key, metadata: article.metadata ?? null });
+      references.push({ slug: article.key.replace(/^articles\//, ''), metadata: article.metadata ?? null });
       list.push(article);
     }
   }
