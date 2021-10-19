@@ -1,10 +1,15 @@
 import TOML from '@iarna/toml';
 import { Command } from 'commander';
+import { build } from 'esbuild';
 import fs from 'fs';
 import matter from 'gray-matter';
 import path from 'path';
-import { Entry, Reference } from '../types';
-import { getRelativePath } from '../utils';
+import type { Entry, Reference, Options } from '../types';
+import { getRelativePath, getWranglerConfig } from '../utils';
+
+interface GenerateOptions extends Pick<Options, 'source' | 'plugins'> {
+  root: string;
+}
 
 async function parseFile(root: string, filePath: string): Promise<Entry> {
   const content = await fs.promises.readFile(filePath, { encoding: 'utf-8' });
@@ -81,8 +86,27 @@ async function parseDirectory(source: string, directoryPath = source): Promise<E
   return list;
 }
 
-export default async function generate(source: string): Promise<Entry[]> {
-  const entries = await parseDirectory(source);
+export default async function generate(options: GenerateOptions): Promise<Entry[]> {
+  let entries = await parseDirectory(options.source);
+
+  const plugins = await Promise.all(
+    (options.plugins ?? []).map(async ({ source, ...params }) => {
+      const outPath = path.resolve(options.root, './node_modules/.workaholic/', source);
+
+      await build({
+        entryPoints: [path.resolve(options.root, source)],
+        outfile: outPath,
+        format: 'cjs',
+        target: 'node12',
+      });
+
+      return (entries: Entry[]): Promise<Entry[]> => require(outPath).process(entries, params);
+    }),
+  );
+
+  for (const process of plugins) {
+    entries = await process(entries);
+  }
 
   return entries;
 }
@@ -92,9 +116,10 @@ export function makeGenerateCommand(): Command {
 
   command
     .description('Generate worker kv data')
-    .argument('[soruce]', 'source directory')
-    .action(async (source) => {
-      const entries = await generate(source);
+    .action(async () => {
+      const config = await getWranglerConfig();
+      const options = config.getWorkaholicOptions();
+      const entries = await generate({ root: process.cwd(), source: options.source, plugins: options.plugins });
 
       process.stdout.write(JSON.stringify(entries, null, 2));
     });

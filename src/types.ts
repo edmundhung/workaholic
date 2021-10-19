@@ -22,3 +22,14 @@ export interface Query {
   listReferences(prefix: string, includeSubfolders?: boolean): Promise<Reference[] | null>;
   getArticle(slug: string): Promise<Article | null>;
 }
+
+export interface Options {
+  binding: string;
+  source: string;
+  plugins?: Array<PluginOptions>
+}
+
+export interface PluginOptions {
+  source: string;
+  [param: string]: any;
+}

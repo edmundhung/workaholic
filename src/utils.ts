@@ -1,6 +1,6 @@
 import TOML from '@iarna/toml';
 import fs from 'fs';
-import { Entry } from './types';
+import type { Entry, Options } from './types';
 
 export function getRelativePath(source: string, target: string): string {
   return target.replace(source, '').replace(/^\//, '');
@@ -25,7 +25,7 @@ export async function parseData(source: string): Promise<Entry[]> {
 }
 
 export async function getWranglerConfig() {
-  const wrangler = await fs.promises.readFile('../wrangler.toml', 'utf-8');
+  const wrangler = await fs.promises.readFile('./wrangler.toml', 'utf-8');
   const config = TOML.parse(wrangler);
 
   return {
@@ -41,6 +41,15 @@ export async function getWranglerConfig() {
       }
 
       return preview ? kv.preview_id : kv.id;
-    }
+    },
+    getWorkaholicOptions(): Options {
+      const options = config['workaholic'] as any;
+
+      if (!options) {
+        throw new Error('[workaholic] options not found; Please initialise with `workaholic init`')
+      }
+
+      return options;
+    },
   };
 }

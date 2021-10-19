@@ -23,7 +23,7 @@ describe('commands', () => {
   });
 
   it('supports generating entries based on the fixtures', async () => {
-    expect(await generate(path.resolve(__dirname, './fixtures'))).toEqual(fixtures);
+    expect(await generate({ root: __dirname, source: path.resolve(__dirname, './fixtures') })).toEqual(fixtures);
   });
 
   it('supports previewing entries on miniflare', async () => {
