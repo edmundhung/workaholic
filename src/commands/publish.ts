@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import fetch, { Response } from 'node-fetch';
 import { Entry } from '../types';
-import { parseData, getWranglerConfig } from '../utils';
+import { parseData, getWranglerConfig, getWranglerDirectory } from '../utils';
 
 export default async function publish(entries: Entry[], { accountId, namespaceId, token }: { accountId: string, namespaceId: string, token: string }): Promise<Response> {
   return fetch(
@@ -27,7 +27,8 @@ export function makePublishCommand(): Command {
     .action(async (source, options) => {
       const entries = await parseData(source);
       console.log('[workaholic] Reading config from wrangler.toml');
-      const { getAccountId, getNamespaceId } = await getWranglerConfig();
+      const root = await getWranglerDirectory();
+      const { getAccountId, getNamespaceId } = await getWranglerConfig(root);
       const accountId = getAccountId();
       const namespaceId = getNamespaceId(options.binding, process.env.NODE_ENV !== 'production');
       const token = process.env.CF_API_TOKEN;

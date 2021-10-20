@@ -1,5 +1,7 @@
 import TOML from '@iarna/toml';
+import path from 'path';
 import fs from 'fs';
+import findUp from 'find-up';
 import type { Entry, Options } from './types';
 
 export function getRelativePath(source: string, target: string): string {
@@ -24,8 +26,18 @@ export async function parseData(source: string): Promise<Entry[]> {
   return entries;
 }
 
-export async function getWranglerConfig() {
-  const wrangler = await fs.promises.readFile('./wrangler.toml', 'utf-8');
+export async function getWranglerDirectory(cwd?: string): Promise<string> {
+  const result = await findUp('wrangler.toml', { cwd });
+
+  if (!result) {
+    throw new Error('[workaholic] Fail to lookup `wrangler.toml`');
+  }
+
+	return path.dirname(result);
+}
+
+export async function getWranglerConfig(root: string) {
+  const wrangler = await fs.promises.readFile(path.resolve(root, './wrangler.toml'), 'utf-8');
   const config = TOML.parse(wrangler);
 
   return {

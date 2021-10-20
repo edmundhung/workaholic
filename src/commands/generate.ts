@@ -5,7 +5,7 @@ import fs from 'fs';
 import matter from 'gray-matter';
 import path from 'path';
 import type { Entry, Reference, Options } from '../types';
-import { getRelativePath, getWranglerConfig } from '../utils';
+import { getRelativePath, getWranglerConfig, getWranglerDirectory } from '../utils';
 
 interface GenerateOptions extends Pick<Options, 'source' | 'plugins'> {
   root: string;
@@ -87,7 +87,7 @@ async function parseDirectory(source: string, directoryPath = source): Promise<E
 }
 
 export default async function generate(options: GenerateOptions): Promise<Entry[]> {
-  let entries = await parseDirectory(options.source);
+  let entries = await parseDirectory(path.resolve(options.root, options.source));
 
   const plugins = await Promise.all(
     (options.plugins ?? []).map(async ({ source, params }) => {
@@ -117,9 +117,10 @@ export function makeGenerateCommand(): Command {
   command
     .description('Generate worker kv data')
     .action(async () => {
-      const config = await getWranglerConfig();
+      const root = await getWranglerDirectory();
+      const config = await getWranglerConfig(root);
       const options = config.getWorkaholicOptions();
-      const entries = await generate({ root: process.cwd(), source: options.source, plugins: options.plugins });
+      const entries = await generate({ root, source: options.source, plugins: options.plugins });
 
       process.stdout.write(JSON.stringify(entries, null, 2));
     });

@@ -43,6 +43,7 @@
   "dependencies": {
     "@iarna/toml": "^2.2.5",
     "commander": "^8.2.0",
+    "find-up": "^5.0.0",
     "gray-matter": "^4.0.3",
     "node-fetch": "^2.6.5",
     "rimraf": "^3.0.2"
