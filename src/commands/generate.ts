@@ -90,7 +90,7 @@ export default async function generate(options: GenerateOptions): Promise<Entry[
   let entries = await parseDirectory(options.source);
 
   const plugins = await Promise.all(
-    (options.plugins ?? []).map(async ({ source, ...params }) => {
+    (options.plugins ?? []).map(async ({ source, params }) => {
       const outPath = path.resolve(options.root, './node_modules/.workaholic/', source);
 
       await build({
