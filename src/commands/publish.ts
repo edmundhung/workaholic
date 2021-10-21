@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import fetch, { Response } from 'node-fetch';
+import path from 'path';
 import { Entry } from '../types';
 import { parseData, getWranglerConfig, getWranglerDirectory } from '../utils';
 
@@ -22,15 +23,16 @@ export function makePublishCommand(): Command {
 
   command
     .description('Publish kv data to Cloudflare')
-    .argument('<data>', 'data soruce')
-    .option('--binding <name>', 'wrangler binding name')
+    .argument('<source>', 'source file path')
+    .option('--preview', 'publish to the preview namespace instead of production', false)
     .action(async (source, options) => {
-      const entries = await parseData(source);
+      const entries = await parseData(path.resolve(process.cwd(), source));
       console.log('[workaholic] Reading config from wrangler.toml');
       const root = await getWranglerDirectory();
-      const { getAccountId, getNamespaceId } = await getWranglerConfig(root);
-      const accountId = getAccountId();
-      const namespaceId = getNamespaceId(options.binding, process.env.NODE_ENV !== 'production');
+      const config = await getWranglerConfig(root);
+      const { binding } = config.getWorkaholicOptions();
+      const accountId = config.getAccountId();
+      const namespaceId = config.getNamespaceId(binding, options.preview);
       const token = process.env.CF_API_TOKEN;
 
       if (!namespaceId) {

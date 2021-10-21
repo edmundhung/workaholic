@@ -1,8 +1,9 @@
 import { Command } from 'commander';
 import { Miniflare } from 'miniflare';
+import path from 'path';
 import rimraf from 'rimraf';
 import { Entry } from '../types';
-import { parseData } from '../utils';
+import { parseData, getWranglerConfig, getWranglerDirectory } from '../utils';
 
 export default async function preview(mf: Miniflare, entries: Entry[], binding: string): Promise<void> {
   const namespace = await mf.getKVNamespace(binding);
@@ -19,11 +20,12 @@ export function makePreviewCommand(): Command {
 
   command
     .description('Persist data on miniflare')
-    .argument('<data>', 'data soruce')
-    .option('--binding <name>', 'wrangler binding name')
-    .action(async (source, options) => {
+    .argument('<source>', 'source file path')
+    .action(async (source) => {
+      const root = await getWranglerDirectory();
+
       console.log('[workaholic] Empty ./.mf/kv');
-      rimraf.sync('./.mf/kv');
+      rimraf.sync(path.resolve(root, './.mf/kv'));
       console.log('[workaholic] Cleanup done');
 
       console.log('[workaholic] Persisting KV on Miniflare');
@@ -33,7 +35,9 @@ export function makePreviewCommand(): Command {
         kvPersist: true,
       });
 
-      const entries = await parseData(source);
+      const entries = await parseData(path.resolve(process.cwd(), source));
+      const config = await getWranglerConfig(root);
+      const options = config.getWorkaholicOptions();
       await preview(mf, entries, options.binding);
       console.log('[workaholic] KV persisted on Miniflare');
     });
