@@ -4,60 +4,30 @@ import { build } from 'esbuild';
 import fs from 'fs';
 import matter from 'gray-matter';
 import path from 'path';
-import type { Entry, Reference, Options } from '../types';
+import type { Build, Entry, Reference, PluginConfig } from '../types';
 import { getRelativePath, getWranglerConfig, getWranglerDirectory } from '../utils';
 
-interface GenerateOptions extends Pick<Options, 'source' | 'plugins'> {
+interface GenerateOptions {
   root: string;
+  source: string;
+  builds?: Build[];
 }
 
+const defaultPlugins = [
+  require('../plugins/plugin-json.ts'),
+  require('../plugins/plugin-md.ts'),
+  require('../plugins/plugin-yaml.ts'),
+  require('../plugins/plugin-toml.ts'),
+];
+
 async function parseFile(root: string, filePath: string): Promise<Entry> {
-  const content = await fs.promises.readFile(filePath, { encoding: 'utf-8' });
-  const extension = path.extname(filePath);
+  const value = await fs.promises.readFile(filePath, { encoding: 'utf-8' });
   const key = getRelativePath(root, filePath);
 
-  switch (extension) {
-    case '.md': {
-      const result = matter(content);
-
-      return {
-        key: key.replace(/\.md$/, ''),
-        value: result.content?.replace(/\r/g, '') ?? '',
-        metadata: result.data as any,
-      };
-    }
-    case '.yaml':
-    case '.yml': {
-      const result = matter(['---', content, '---'].join('\n'));
-      const { metadata, ...data } = result.data;
-
-      return {
-        key: key.replace(/\.yaml$/, ''),
-        value: JSON.stringify(data),
-        metadata: metadata,
-      };
-    }
-    case '.toml': {
-      const { metadata, ...data } = TOML.parse(content);
-
-      return {
-        key: key.replace(/\.toml$/, ''),
-        value: JSON.stringify(data),
-        metadata: metadata as any,
-      };
-    }
-    case '.json': {
-      const { metadata, ...data } = JSON.parse(content);
-
-      return {
-        key: key.replace(/\.json$/, ''),
-        value: JSON.stringify(data),
-        metadata: metadata,
-      };
-    }
-    default:
-      throw new Error(`Unsupported file extension: ${extension}`);
-  }
+  return {
+    key,
+    value,
+  };
 }
 
 async function parseDirectory(source: string, directoryPath = source): Promise<Entry[]> {
@@ -78,27 +48,16 @@ async function parseDirectory(source: string, directoryPath = source): Promise<E
   return list;
 }
 
-export default async function generate(options: GenerateOptions): Promise<Entry[]> {
-  let entries = await parseDirectory(path.resolve(options.root, options.source));
+function defaultTransform(entry: Entry): Promise<Entry> {
+  return Promise.resolve(entry);
+}
 
-  const plugins = await Promise.all(
-    (options.plugins ?? []).map(async ({ source, params }) => {
-      const outPath = path.resolve(options.root, './node_modules/.workaholic/', source);
+export default async function generate({ root, source, builds = defaultPlugins.map<Build>(plugin => plugin.setupBuild()) }: GenerateOptions): Promise<Entry[]> {
+  let entries = await parseDirectory(path.resolve(root, source));
 
-      await build({
-        entryPoints: [path.resolve(options.root, source)],
-        outfile: outPath,
-        format: 'cjs',
-        target: 'node12',
-      });
+  const transform = builds.reduce((fn, build) => (entry: Entry) => fn(entry).then(build.transform ?? defaultTransform), defaultTransform);
 
-      return (entries: Entry[]): Promise<Entry[]> => require(outPath).process(entries, params);
-    }),
-  );
-
-  for (const process of plugins) {
-    entries = await process(entries);
-  }
+  entries = await Promise.all(entries.map(entry => transform(entry)));
 
   let referencesByKey: Record<string, Reference[]> = {};
 
@@ -128,6 +87,19 @@ export default async function generate(options: GenerateOptions): Promise<Entry[
   ];
 }
 
+async function resolvePlugin(root: string, config: PluginConfig): Promise<Build> {
+  const target = path.resolve(root, './node_modules/.workaholic/', config.source);
+
+  await build({
+    entryPoints: [path.resolve(root, config.source)],
+    outfile: target,
+    format: 'cjs',
+    target: 'node12',
+  });
+
+  return require(target).setupBuild(config.options);
+}
+
 export function makeGenerateCommand(): Command {
   const command = new Command('generate');
 
@@ -137,8 +109,13 @@ export function makeGenerateCommand(): Command {
     .action(async (output) => {
       const root = await getWranglerDirectory();
       const config = await getWranglerConfig(root);
-      const options = config.getWorkaholicOptions();
-      const entries = await generate({ root, source: options.source, plugins: options.plugins });
+      const options = config.getWorkaholicConfig();
+      const builds = options.plugins ? await Promise.all(options.plugins.map(plugin => resolvePlugin(root, plugin))) : [];
+      const entries = await generate({
+        root,
+        source: options.source,
+        builds,
+      });
 
       fs.promises.writeFile(path.resolve(process.cwd(), output), JSON.stringify(entries, null, 2));
     });

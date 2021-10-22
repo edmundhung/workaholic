@@ -1,5 +1,5 @@
 export type Metadata = {
-  [key: string]: string | undefined;
+  [key: string]: any | undefined;
 }
 
 export interface Entry {
@@ -23,13 +23,24 @@ export interface Query {
   getData(slug: string): Promise<Data | null>;
 }
 
-export interface Options {
+export interface Config {
   binding: string;
   source: string;
-  plugins?: Array<PluginOptions>
+  plugins?: Array<PluginConfig>
 }
 
-export interface PluginOptions {
+export interface PluginConfig {
   source: string;
-  [param: string]: any;
+  options?: Record<string, any>;
+}
+
+export interface Plugin {
+  name?: string;
+  setupBuild?: SetupBuildFunction;
+}
+
+export type SetupBuildFunction = (options?: Record<string, any>) => Build;
+
+export interface Build {
+  transform?: (entry: Entry) => Entry | Promise<Entry>;
 }

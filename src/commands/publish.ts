@@ -30,7 +30,7 @@ export function makePublishCommand(): Command {
       console.log('[workaholic] Reading config from wrangler.toml');
       const root = await getWranglerDirectory();
       const config = await getWranglerConfig(root);
-      const { binding } = config.getWorkaholicOptions();
+      const { binding } = config.getWorkaholicConfig();
       const accountId = config.getAccountId();
       const namespaceId = config.getNamespaceId(binding, options.preview);
       const token = process.env.CF_API_TOKEN;

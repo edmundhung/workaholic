@@ -37,7 +37,7 @@ export function makePreviewCommand(): Command {
 
       const entries = await parseData(path.resolve(process.cwd(), source));
       const config = await getWranglerConfig(root);
-      const options = config.getWorkaholicOptions();
+      const options = config.getWorkaholicConfig();
       await preview(mf, entries, options.binding);
       console.log('[workaholic] KV persisted on Miniflare');
     });
