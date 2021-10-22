@@ -14,7 +14,7 @@ interface GenerateOptions extends Pick<Options, 'source' | 'plugins'> {
 async function parseFile(root: string, filePath: string): Promise<Entry> {
   const content = await fs.promises.readFile(filePath, { encoding: 'utf-8' });
   const extension = path.extname(filePath);
-  const key = `articles/${getRelativePath(root, filePath)}`;
+  const key = getRelativePath(root, filePath);
 
   switch (extension) {
     case '.md': {
@@ -61,27 +61,19 @@ async function parseFile(root: string, filePath: string): Promise<Entry> {
 }
 
 async function parseDirectory(source: string, directoryPath = source): Promise<Entry[]> {
-  let references: Reference[] = [];
   let list: Entry[] = [];
 
   for (const dirent of await fs.promises.readdir(directoryPath, { withFileTypes: true })) {
     if (dirent.isDirectory()) {
-      const [directoryEntry, ...articles] = await parseDirectory(source, `${directoryPath}/${dirent.name}`);
+      const entries = await parseDirectory(source, `${directoryPath}/${dirent.name}`);
 
-      references.push(...JSON.parse(directoryEntry.value));
-      list.push(directoryEntry, ...articles);
+      list.push(...entries);
     } else if (dirent.isFile()) {
-      const article = await parseFile(source, `${directoryPath}/${dirent.name}`);
+      const entry = await parseFile(source, `${directoryPath}/${dirent.name}`);
 
-      references.push({ slug: article.key.replace(/^articles\//, ''), metadata: article.metadata ?? null });
-      list.push(article);
+      list.push(entry);
     }
   }
-
-  list.unshift({
-    key: `references/${getRelativePath(source, directoryPath)}`,
-    value: JSON.stringify(references),
-  });
 
   return list;
 }
@@ -108,7 +100,32 @@ export default async function generate(options: GenerateOptions): Promise<Entry[
     entries = await process(entries);
   }
 
-  return entries;
+  let referencesByKey: Record<string, Reference[]> = {};
+
+  for (const entry of entries) {
+    let key = entry.key;
+
+    while (key !== '') {
+      key = key.includes('/') ? key.slice(0, key.lastIndexOf('/')) : '';
+
+      if (typeof referencesByKey[key] === 'undefined') {
+        referencesByKey[key] = [];
+      }
+
+      referencesByKey[key].push({ slug: entry.key, metadata: entry.metadata ?? null });
+    }
+  }
+
+  return [
+    ...entries.map<Entry>(entry => ({
+      ...entry,
+      key: `articles/${entry.key}`,
+    })),
+    ...Object.entries(referencesByKey).map<Entry>(([key, references]) => ({
+      key: `references/${key}`,
+      value: JSON.stringify(references),
+    })),
+  ];
 }
 
 export function makeGenerateCommand(): Command {
