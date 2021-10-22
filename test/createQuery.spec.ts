@@ -21,13 +21,13 @@ describe('createQuery', () => {
     const query = createQuery(namespace);
 
     expect(query).toHaveProperty('listReferences');
-    expect(query).toHaveProperty('getArticle');
+    expect(query).toHaveProperty('getData');
   });
 
   it('handles the get query properly', async () => {
     const query = createQuery(namespace);
     const resolveFixture = (slug: string) => {
-      const kv = fixtures.find(kv => kv.key === `articles/${slug}`);
+      const kv = fixtures.find(kv => kv.key === `data/${slug}`);
 
       return {
         content: kv?.value ?? null,
@@ -35,18 +35,18 @@ describe('createQuery', () => {
       };
     };
 
-    expect(await query.getArticle('opus-dicto-spargit')).toEqual(resolveFixture('opus-dicto-spargit'));
-    expect(await query.getArticle('bar/de-hostis-habetur')).toEqual(resolveFixture('bar/de-hostis-habetur'));
-    expect(await query.getArticle('foo/reditum-quater')).toEqual(resolveFixture('foo/reditum-quater'));
+    expect(await query.getData('opus-dicto-spargit')).toEqual(resolveFixture('opus-dicto-spargit'));
+    expect(await query.getData('bar/de-hostis-habetur')).toEqual(resolveFixture('bar/de-hostis-habetur'));
+    expect(await query.getData('foo/reditum-quater')).toEqual(resolveFixture('foo/reditum-quater'));
   });
 
   it('handles the list query properly', async () => {
     const query = createQuery(namespace);
     const resolveFixture = (slug: string) => {
-      const kv = fixtures.find(kv => kv.key === `articles/${slug}`);
+      const kv = fixtures.find(kv => kv.key === `data/${slug}`);
 
       return {
-        slug: kv?.key.replace(/^articles\//, ''),
+        slug: kv?.key.replace(/^data\//, ''),
         metadata: kv?.metadata ?? null,
       };
     };

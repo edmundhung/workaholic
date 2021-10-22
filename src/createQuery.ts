@@ -1,4 +1,4 @@
-import type { Metadata, Article, Reference, Query } from './types';
+import type { Metadata, Data, Reference, Query } from './types';
 
 function createQuery(namespace: KVNamespace): Query {
   return {
@@ -17,8 +17,8 @@ function createQuery(namespace: KVNamespace): Query {
 
       return references.filter(ref => ref.slug.split('/').length === level + 1);
     },
-    async getArticle(slug: string): Promise<Article | null> {
-      const data = await namespace.getWithMetadata<Metadata>(`articles/${slug}`, 'text');
+    async getData(slug: string): Promise<Data | null> {
+      const data = await namespace.getWithMetadata<Metadata>(`data/${slug}`, 'text');
 
       if (!data.value && !data.metadata) {
         return null;

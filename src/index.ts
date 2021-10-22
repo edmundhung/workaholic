@@ -4,7 +4,7 @@ export type {
   Metadata,
   Entry,
   Reference,
-  Article,
+  Data,
   Query,
 } from './types';
 

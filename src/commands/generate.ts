@@ -119,7 +119,7 @@ export default async function generate(options: GenerateOptions): Promise<Entry[
   return [
     ...entries.map<Entry>(entry => ({
       ...entry,
-      key: `articles/${entry.key}`,
+      key: `data/${entry.key}`,
     })),
     ...Object.entries(referencesByKey).map<Entry>(([key, references]) => ({
       key: `references/${key}`,
