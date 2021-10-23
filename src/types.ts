@@ -42,5 +42,7 @@ export interface Plugin {
 export type SetupBuildFunction = (options?: Record<string, any>) => Build;
 
 export interface Build {
+  namespace?: string;
   transform?: (entry: Entry) => Entry | Promise<Entry>;
+  derive?: (entries: Entry[]) => Entry[] | Promise<Entry[]>;
 }

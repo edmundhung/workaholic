@@ -18,6 +18,7 @@ const defaultPlugins = [
   require('../plugins/plugin-md.ts'),
   require('../plugins/plugin-yaml.ts'),
   require('../plugins/plugin-toml.ts'),
+  require('../plugins/plugin-list.ts'),
 ];
 
 async function parseFile(root: string, filePath: string): Promise<Entry> {
@@ -48,43 +49,49 @@ async function parseDirectory(source: string, directoryPath = source): Promise<E
   return list;
 }
 
-function defaultTransform(entry: Entry): Promise<Entry> {
-  return Promise.resolve(entry);
+
+
+function defaultDerive(entries: Entry[]): Promise<Entry[]> {
+  return Promise.resolve([]);
+}
+
+function createTransform(builds: Build[]): (entries: Entry[]) => Promise<Entry[]> {
+  const defaultTransform = (entry: Entry): Promise<Entry> => Promise.resolve(entry);
+  const transform = builds.reduce((fn, build) => (entry: Entry) => fn(entry).then(build.transform ?? defaultTransform), defaultTransform);
+
+  return (entries: Entry[]) => Promise.all(entries.map(entry => transform(entry)));
+}
+
+function assignNamespace(namespace: string, entries: Entry[]): Entry[] {
+  return entries.map<Entry>(entry => ({ ...entry, key: `${namespace}/${entry.key}` }));
 }
 
 export default async function generate({ root, source, builds = defaultPlugins.map<Build>(plugin => plugin.setupBuild()) }: GenerateOptions): Promise<Entry[]> {
-  let entries = await parseDirectory(path.resolve(root, source));
-
-  const transform = builds.reduce((fn, build) => (entry: Entry) => fn(entry).then(build.transform ?? defaultTransform), defaultTransform);
-
-  entries = await Promise.all(entries.map(entry => transform(entry)));
-
-  let referencesByKey: Record<string, Reference[]> = {};
-
-  for (const entry of entries) {
-    let key = entry.key;
-
-    while (key !== '') {
-      key = key.includes('/') ? key.slice(0, key.lastIndexOf('/')) : '';
-
-      if (typeof referencesByKey[key] === 'undefined') {
-        referencesByKey[key] = [];
+  const files = await parseDirectory(path.resolve(root, source));
+  const transform = createTransform(builds);
+  const entries = await transform(files);
+  const data = assignNamespace('data', entries);
+  const derived = await Promise.all(
+    builds.reduce((result, build) => {
+      if (!build.derive) {
+        return result;
       }
 
-      referencesByKey[key].push({ slug: entry.key, metadata: entry.metadata ?? null });
-    }
-  }
+      const promise = Promise
+        .resolve(build.derive(entries))
+        .then(entries => {
+          if (!build.namespace) {
+            throw new Error('[Workaholic] namespace is required for deriving entries');
+          }
 
-  return [
-    ...entries.map<Entry>(entry => ({
-      ...entry,
-      key: `data/${entry.key}`,
-    })),
-    ...Object.entries(referencesByKey).map<Entry>(([key, references]) => ({
-      key: `references/${key}`,
-      value: JSON.stringify(references),
-    })),
-  ];
+          return assignNamespace(build.namespace, entries)
+        });
+
+      return result.concat(promise);
+    }, [] as Array<Promise<Entry[]>>)
+  );
+
+  return derived.reduce((result, entries) => result.concat(entries), data);
 }
 
 async function resolvePlugin(root: string, config: PluginConfig): Promise<Build> {
