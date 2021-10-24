@@ -32,6 +32,7 @@
   "homepage": "https://github.com/edmundhung/workaholic#readme",
   "devDependencies": {
     "@types/jest": "^27.0.2",
+    "@types/js-yaml": "^4.0.4",
     "@types/node-fetch": "^2.5.12",
     "@types/rimraf": "^3.0.2",
     "esbuild": "^0.13.4",
@@ -46,6 +47,7 @@
     "commander": "^8.2.0",
     "find-up": "^5.0.0",
     "gray-matter": "^4.0.3",
+    "js-yaml": "^4.1.0",
     "node-fetch": "^2.6.5",
     "rimraf": "^3.0.2"
   }

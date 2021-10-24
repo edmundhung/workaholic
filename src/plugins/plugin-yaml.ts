@@ -1,4 +1,4 @@
-import matter from 'gray-matter';
+import yaml from 'js-yaml';
 import type { Entry, SetupBuildFunction } from '../types';
 
 export const setupBuild: SetupBuildFunction = () => {
@@ -8,8 +8,7 @@ export const setupBuild: SetupBuildFunction = () => {
         return entry;
       }
 
-      const result = matter(['---', entry.value, '---'].join('\n'));
-      const { metadata, ...data } = result.data;
+      const { metadata, ...data } = yaml.load(entry.value) as any;
 
       return {
         key: entry.key.replace(/\.(yaml|yml)$/, ''),
