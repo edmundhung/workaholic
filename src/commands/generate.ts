@@ -8,7 +8,6 @@ import type { Build, Entry, PluginConfig } from '../types';
 import { getRelativePath, getWranglerConfig, getWranglerDirectory } from '../utils';
 
 interface GenerateOptions {
-  root: string;
   source: string;
   builds?: Build[];
 }
@@ -66,8 +65,8 @@ function assignNamespace(namespace: string, entries: Entry[]): Entry[] {
   return entries.map<Entry>(entry => ({ ...entry, key: `${namespace}/${entry.key}` }));
 }
 
-export default async function generate({ root, source, builds = defaultPlugins.map<Build>(plugin => plugin.setupBuild()) }: GenerateOptions): Promise<Entry[]> {
-  const files = await parseDirectory(path.resolve(root, source));
+export default async function generate({ source, builds = defaultPlugins.map<Build>(plugin => plugin.setupBuild()) }: GenerateOptions): Promise<Entry[]> {
+  const files = await parseDirectory(source);
   const transform = createTransform(builds);
   const entries = await transform(files);
   const data = assignNamespace('data', entries);
@@ -119,8 +118,7 @@ export function makeGenerateCommand(): Command {
       const options = config.getWorkaholicConfig();
       const builds = options.plugins ? await Promise.all(options.plugins.map(plugin => resolvePlugin(root, plugin))) : [];
       const entries = await generate({
-        root,
-        source: options.source,
+        source: path.resolve(root, options.source),
         builds,
       });
 

@@ -17,7 +17,6 @@ describe('createClient', () => {
     });
 
     entries = await generate({
-      root: __dirname,
       source: path.resolve(__dirname, '../fixtures'),
       builds: [setupBuild()],
     });
