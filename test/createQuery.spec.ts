@@ -13,8 +13,7 @@ describe('createQuery', () => {
       buildCommand: '',
     });
 
-    namespace = await mf.getKVNamespace('test');
-    await preview(namespace, fixtures);
+    namespace = await preview(mf, 'test', fixtures);
   });
 
   it('returns data by the file path', async () => {

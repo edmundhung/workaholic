@@ -21,9 +21,7 @@ describe('plugin-toml', () => {
       source: path.resolve(__dirname, '../fixtures'),
       builds: [setupBuild()],
     });
-    namespace = await mf.getKVNamespace('test');
-
-    await preview(namespace, entries);
+    namespace = await preview(mf, 'test', entries);
   });
 
   it('transforms data by parsing toml content', async () => {

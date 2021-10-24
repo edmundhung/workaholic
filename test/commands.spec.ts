@@ -31,9 +31,7 @@ describe('commands', () => {
       script: `addEventListener("fetch", () => {});`,
       buildCommand: '',
     });
-    const namespace = await mf.getKVNamespace('test');
-
-    await preview(namespace, fixtures);
+    const namespace = await preview(mf, 'test', fixtures);
 
     for (const entry of fixtures) {
       expect(await namespace.getWithMetadata(entry.key)).toEqual({

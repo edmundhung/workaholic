@@ -5,12 +5,16 @@ import rimraf from 'rimraf';
 import { Entry } from '../types';
 import { parseData, getWranglerConfig, getWranglerDirectory } from '../utils';
 
-export default async function preview(namespace: KVNamespace, entries: Entry[], ): Promise<void> {
+export default async function preview(mf: Miniflare, binding: string, entries: Entry[]): Promise<KVNamespace> {
+  const kvNamespace = await mf.getKVNamespace(binding);
+
   await Promise.all(
     entries.map(entry =>
-      namespace.put(entry.key, entry.value, { metadata: entry.metadata }),
+      kvNamespace.put(entry.key, entry.value, { metadata: entry.metadata }),
     ),
   );
+
+  return kvNamespace;
 }
 
 export function makePreviewCommand(): Command {
@@ -35,8 +39,7 @@ export function makePreviewCommand(): Command {
       const entries = await parseData(path.resolve(process.cwd(), source));
       const config = await getWranglerConfig(root);
       const options = config.getWorkaholicConfig();
-      const namespace = await mf.getKVNamespace(options.binding);
-      await preview(namespace, entries);
+      await preview(mf, options.binding, entries);
       console.log('[workaholic] KV persisted on Miniflare');
     });
 
