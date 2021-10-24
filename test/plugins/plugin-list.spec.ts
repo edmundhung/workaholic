@@ -23,7 +23,7 @@ describe('createClient', () => {
     });
     namespace = await mf.getKVNamespace('test');
 
-    await preview(mf, entries, 'test');
+    await preview(namespace, entries);
   });
 
   it('inherits default client', () => {
@@ -38,7 +38,7 @@ describe('createClient', () => {
       const kv = entries.find(kv => kv.key === `data/${slug}`);
 
       return {
-        slug: kv?.key.replace(/^data\//, ''),
+        slug,
         metadata: kv?.metadata ?? null,
       };
     };

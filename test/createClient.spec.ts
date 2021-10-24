@@ -13,9 +13,8 @@ describe('createClient', () => {
       buildCommand: '',
     });
 
-    await preview(mf, fixtures, 'test');
-
     namespace = await mf.getKVNamespace('test');
+    await preview(namespace, fixtures);
   });
 
   it('provides a default query', () => {
