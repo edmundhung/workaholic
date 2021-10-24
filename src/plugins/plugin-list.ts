@@ -34,7 +34,7 @@ export const setupBuild: SetupBuildFunction = () => {
 export function setupQuery(): QueryEnhancer<Reference[]> {
   return {
     namespace: 'references',
-    handlerFactory: kvNamespace => async (path: string, { includeSubfolders = false } = {}) => {
+    handlerFactory: kvNamespace => async (path: string, { includeSubfolders }) => {
       const references = await kvNamespace.get<Reference[]>(`references/${path}`, 'json');
 
       if (!references) {

@@ -36,7 +36,7 @@ function createQuery(kvNamespace: KVNamespace, enhancers: QueryEnhancer[] = []):
       return null;
     }
 
-    return handler(path, options);
+    return handler(path, options ?? {});
   }
 
   for (const enhancer of [defaultEnhancer, ...enhancers]) {

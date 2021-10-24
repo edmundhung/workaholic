@@ -40,7 +40,7 @@ export interface Build {
 }
 
 export interface Handler<Payload = any> {
-  (slug: string, options?: Record<string, any>): Promise<Payload | null>;
+  (slug: string, options: Record<string, any>): Promise<Payload | null>;
 }
 
 export interface HandlerFactory<Payload = any> {
