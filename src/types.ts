@@ -8,20 +8,16 @@ export interface Entry {
   metadata?: Metadata;
 }
 
-export interface Reference {
-  slug: string;
-  metadata: Metadata | null;
-}
-
 export interface Data {
   content: string | null;
   metadata: Metadata | null;
 }
 
-export interface Query {
-  listReferences(prefix: string, includeSubfolders?: boolean): Promise<Reference[] | null>;
+export interface DefaultClient {
   getData(slug: string): Promise<Data | null>;
 }
+
+export type Client<T extends DefaultClient = DefaultClient> = DefaultClient & T;
 
 export interface Config {
   binding: string;

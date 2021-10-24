@@ -1,5 +1,14 @@
 
-import type { Reference, Entry, SetupBuildFunction } from '../types';
+import type { Client, Entry, Metadata, SetupBuildFunction } from '../types';
+
+export interface Reference {
+  slug: string;
+  metadata: Metadata | null;
+}
+
+export interface ListPlugin extends Client {
+  listReferences(prefix: string, query: { includeSubfolders?: boolean }): Promise<Reference[] | null>;
+}
 
 export const setupBuild: SetupBuildFunction = () => {
   return {
@@ -25,3 +34,24 @@ export const setupBuild: SetupBuildFunction = () => {
     },
   };
 };
+
+export function setupClient(client: Client, namespace: KVNamespace): Client<ListPlugin> {
+  return {
+    ...client,
+    async listReferences(prefix: string, { includeSubfolders = false } = {}): Promise<Reference[] | null> {
+      const references = await namespace.get<Reference[]>(`references/${prefix}`, 'json');
+
+      if (!references) {
+        return null;
+      }
+
+      if (includeSubfolders) {
+        return references;
+      }
+
+      const level = prefix !== '' ? prefix.split('/').length : 0;
+
+      return references.filter(ref => ref.slug.split('/').length === level + 1);
+    },
+  };
+}

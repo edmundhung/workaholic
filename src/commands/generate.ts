@@ -4,7 +4,7 @@ import { build } from 'esbuild';
 import fs from 'fs';
 import matter from 'gray-matter';
 import path from 'path';
-import type { Build, Entry, Reference, PluginConfig } from '../types';
+import type { Build, Entry, PluginConfig } from '../types';
 import { getRelativePath, getWranglerConfig, getWranglerDirectory } from '../utils';
 
 interface GenerateOptions {
