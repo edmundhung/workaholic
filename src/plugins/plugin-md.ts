@@ -12,7 +12,7 @@ export const setupBuild: SetupBuildFunction = () => {
 
       return {
         key: entry.key.replace(/\.md$/, ''),
-        value: result.content?.replace(/\r/g, '') ?? '',
+        value: result.content?.replace(/\r/g, '').trim() ?? '',
         metadata: result.data,
       };
     },
