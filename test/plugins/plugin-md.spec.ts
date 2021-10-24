@@ -2,7 +2,7 @@ import { Miniflare } from 'miniflare';
 import path from 'path';
 import generate from '../../src/commands/generate';
 import preview from '../../src/commands/preview';
-import createClient from '../../src/createClient';
+import createQuery from '../../src/createQuery';
 import { setupBuild } from '../../src/plugins/plugin-md';
 import { Entry } from '../../src/types';
 import data from '../fixtures/sample-json.json';
@@ -27,10 +27,10 @@ describe('plugin-md', () => {
   });
 
   it('transforms data by parsing md content', async () => {
-    const client = createClient(namespace);
+    const query = createQuery(namespace);
     const { metadata, ...content } = data;
 
-    expect(await client.getData('sample-markdown')).toEqual({
+    expect(await query('data', 'sample-markdown')).toEqual({
       content: `
 # Mulcet vincere
 

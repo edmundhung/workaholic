@@ -1,12 +1,12 @@
-import createClient from './createClient';
+import createQuery from './createQuery';
 
 export type {
   Metadata,
   Entry,
   Data,
-  Client,
+  Query,
 } from './types';
 
 export {
-  createClient,
+  createQuery,
 };

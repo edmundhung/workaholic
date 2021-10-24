@@ -13,11 +13,7 @@ export interface Data {
   metadata: Metadata | null;
 }
 
-export interface DefaultClient {
-  getData(slug: string): Promise<Data | null>;
-}
-
-export type Client<T extends DefaultClient = DefaultClient> = DefaultClient & T;
+export type Query<Payload = any> = (namespace: string, path: string, options?: Record<string, any>) => Promise<Payload | null>;
 
 export interface Config {
   binding: string;
@@ -41,4 +37,17 @@ export interface Build {
   namespace?: string;
   transform?: (entry: Entry) => Entry | Promise<Entry>;
   derive?: (entries: Entry[]) => Entry[] | Promise<Entry[]>;
+}
+
+export interface Handler<Payload = any> {
+  (slug: string, options?: Record<string, any>): Promise<Payload | null>;
+}
+
+export interface HandlerFactory<Payload = any> {
+  (kvNamespace: KVNamespace): Handler<Payload>;
+}
+
+export interface QueryEnhancer<Payload = any> {
+  namespace: string;
+  handlerFactory: HandlerFactory<Payload>;
 }

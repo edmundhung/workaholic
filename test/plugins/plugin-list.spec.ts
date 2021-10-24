@@ -2,8 +2,8 @@ import { Miniflare } from 'miniflare';
 import path from 'path';
 import generate from '../../src/commands/generate';
 import preview from '../../src/commands/preview';
-import createClient from '../../src/createClient';
-import { setupBuild, setupClient } from '../../src/plugins/plugin-list';
+import createQuery from '../../src/createQuery';
+import { setupBuild, setupQuery } from '../../src/plugins/plugin-list';
 import { Entry } from '../../src/types';
 
 describe('plugin-list', () => {
@@ -25,16 +25,10 @@ describe('plugin-list', () => {
     await preview(namespace, entries);
   });
 
-  it('inherits default client', () => {
-    const client = createClient(namespace);
-
-    expect(setupClient(client)).toMatchObject(client);
-  });
-
-  it('handles the list query properly', async () => {
-    const client = setupClient(createClient(namespace), namespace);
+  it('handles the references query properly', async () => {
+    const query = createQuery(namespace, [setupQuery()]);
     const getReference = async (slug: string) => {
-      const data = await client.getData(slug);
+      const data = await query('data', slug);
 
       return {
         slug,
@@ -42,9 +36,9 @@ describe('plugin-list', () => {
       };
     };
 
-    expect(await client.listReferences('foo', { includeSubfolders: false })).toEqual([await getReference('foo/de-hostis-habetur.md'), await getReference('foo/mulcet-vincere.md')]);
-    expect(await client.listReferences('foo', { includeSubfolders: true })).toEqual([await getReference('foo/de-hostis-habetur.md'), await getReference('foo/mulcet-vincere.md')]);
-    expect(await client.listReferences('')).toEqual([await getReference('sample-json.json'), await getReference('sample-markdown.md'), await getReference('sample-toml.toml'), await getReference('sample-yaml.yaml')]);
-    expect(await client.listReferences('', { includeSubfolders: true })).toEqual([await getReference('foo/de-hostis-habetur.md'), await getReference('foo/mulcet-vincere.md'), await getReference('sample-json.json'), await getReference('sample-markdown.md'), await getReference('sample-toml.toml'), await getReference('sample-yaml.yaml')]);
+    expect(await query('references', 'foo', { includeSubfolders: false })).toEqual([await getReference('foo/de-hostis-habetur.md'), await getReference('foo/mulcet-vincere.md')]);
+    expect(await query('references', 'foo', { includeSubfolders: true })).toEqual([await getReference('foo/de-hostis-habetur.md'), await getReference('foo/mulcet-vincere.md')]);
+    expect(await query('references', '')).toEqual([await getReference('sample-json.json'), await getReference('sample-markdown.md'), await getReference('sample-toml.toml'), await getReference('sample-yaml.yaml')]);
+    expect(await query('references', '', { includeSubfolders: true })).toEqual([await getReference('foo/de-hostis-habetur.md'), await getReference('foo/mulcet-vincere.md'), await getReference('sample-json.json'), await getReference('sample-markdown.md'), await getReference('sample-toml.toml'), await getReference('sample-yaml.yaml')]);
   });
 });

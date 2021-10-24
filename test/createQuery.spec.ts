@@ -1,10 +1,10 @@
 import { Miniflare } from 'miniflare';
 import preview from '../src/commands/preview';
-import createClient from '../src/createClient';
+import createQuery from '../src/createQuery';
 import fixtures from './fixtures.json';
 import { setupClient } from '../src/plugins/plugin-list';
 
-describe('createClient', () => {
+describe('createQuery', () => {
   let namespace: KVNamespace;
 
   beforeAll(async () => {
@@ -17,14 +17,8 @@ describe('createClient', () => {
     await preview(namespace, fixtures);
   });
 
-  it('provides a default query', () => {
-    const client = createClient(namespace);
-
-    expect(client).toHaveProperty('getData');
-  });
-
-  it('handles the getData query properly', async () => {
-    const client = createClient(namespace);
+  it('returns data by the file path', async () => {
+    const query = createQuery(namespace);
     const resolveFixture = (slug: string) => {
       const kv = fixtures.find(kv => kv.key === `data/${slug}`);
 
@@ -34,7 +28,7 @@ describe('createClient', () => {
       };
     };
 
-    expect(await client.getData('sample-markdown.md')).toEqual(resolveFixture('sample-markdown.md'));
-    expect(await client.getData('foo/de-hostis-habetur.md')).toEqual(resolveFixture('foo/de-hostis-habetur.md'));
+    expect(await query('data', 'sample-markdown.md')).toEqual(resolveFixture('sample-markdown.md'));
+    expect(await query('data', 'foo/de-hostis-habetur.md')).toEqual(resolveFixture('foo/de-hostis-habetur.md'));
   });
 });

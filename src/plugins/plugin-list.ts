@@ -1,13 +1,9 @@
 
-import type { Client, Entry, Metadata, SetupBuildFunction } from '../types';
+import type { Query, Entry, Metadata, SetupBuildFunction, QueryEnhancer } from '../types';
 
 export interface Reference {
   slug: string;
   metadata: Metadata | null;
-}
-
-export interface ListPlugin extends Client {
-  listReferences(prefix: string, query: { includeSubfolders?: boolean }): Promise<Reference[] | null>;
 }
 
 export const setupBuild: SetupBuildFunction = () => {
@@ -35,11 +31,11 @@ export const setupBuild: SetupBuildFunction = () => {
   };
 };
 
-export function setupClient(client: Client, namespace: KVNamespace): Client<ListPlugin> {
+export function setupQuery(): QueryEnhancer<Reference[]> {
   return {
-    ...client,
-    async listReferences(prefix: string, { includeSubfolders = false } = {}): Promise<Reference[] | null> {
-      const references = await namespace.get<Reference[]>(`references/${prefix}`, 'json');
+    namespace: 'references',
+    handlerFactory: kvNamespace => async (path: string, { includeSubfolders = false } = {}) => {
+      const references = await kvNamespace.get<Reference[]>(`references/${path}`, 'json');
 
       if (!references) {
         return null;
@@ -49,7 +45,7 @@ export function setupClient(client: Client, namespace: KVNamespace): Client<List
         return references;
       }
 
-      const level = prefix !== '' ? prefix.split('/').length : 0;
+      const level = path !== '' ? path.split('/').length : 0;
 
       return references.filter(ref => ref.slug.split('/').length === level + 1);
     },

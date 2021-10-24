@@ -2,7 +2,7 @@ import { Miniflare } from 'miniflare';
 import path from 'path';
 import generate from '../../src/commands/generate';
 import preview from '../../src/commands/preview';
-import createClient from '../../src/createClient';
+import createQuery from '../../src/createQuery';
 import { setupBuild } from '../../src/plugins/plugin-json';
 import { Entry } from '../../src/types';
 import data from '../fixtures/sample-json.json';
@@ -27,10 +27,10 @@ describe('plugin-json', () => {
   });
 
   it('transforms data by parsing json content', async () => {
-    const client = createClient(namespace);
+    const query = createQuery(namespace);
     const { metadata, ...content } = data;
 
-    expect(await client.getData('sample-json')).toEqual({
+    expect(await query('data', 'sample-json')).toEqual({
       content: JSON.stringify(content),
       metadata,
     });
