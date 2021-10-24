@@ -13,11 +13,11 @@ interface GenerateOptions {
 }
 
 const defaultPlugins = [
-  require('../plugins/plugin-json.ts'),
-  require('../plugins/plugin-md.ts'),
-  require('../plugins/plugin-yaml.ts'),
-  require('../plugins/plugin-toml.ts'),
-  require('../plugins/plugin-list.ts'),
+  require('../plugins/plugin-json'),
+  require('../plugins/plugin-md'),
+  require('../plugins/plugin-yaml'),
+  require('../plugins/plugin-toml'),
+  require('../plugins/plugin-list'),
 ];
 
 async function parseFile(root: string, filePath: string): Promise<Entry> {
@@ -65,7 +65,7 @@ function assignNamespace(namespace: string, entries: Entry[]): Entry[] {
   return entries.map<Entry>(entry => ({ ...entry, key: `${namespace}/${entry.key}` }));
 }
 
-export default async function generate({ source, builds = defaultPlugins.map<Build>(plugin => plugin.setupBuild()) }: GenerateOptions): Promise<Entry[]> {
+export default async function generate({ source, builds = [] }: GenerateOptions): Promise<Entry[]> {
   const files = await parseDirectory(source);
   const transform = createTransform(builds);
   const entries = await transform(files);
@@ -116,7 +116,7 @@ export function makeGenerateCommand(): Command {
       const root = await getWranglerDirectory();
       const config = await getWranglerConfig(root);
       const options = config.getWorkaholicConfig();
-      const builds = options.plugins ? await Promise.all(options.plugins.map(plugin => resolvePlugin(root, plugin))) : [];
+      const builds = options.plugins ? await Promise.all(options.plugins.map(plugin => resolvePlugin(root, plugin))) : defaultPlugins.map<Build>(plugin => plugin.setupBuild());
       const entries = await generate({
         source: path.resolve(root, options.source),
         builds,

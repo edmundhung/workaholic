@@ -34,8 +34,7 @@ describe('createClient', () => {
       };
     };
 
-    expect(await client.getData('opus-dicto-spargit')).toEqual(resolveFixture('opus-dicto-spargit'));
-    expect(await client.getData('bar/de-hostis-habetur')).toEqual(resolveFixture('bar/de-hostis-habetur'));
-    expect(await client.getData('foo/reditum-quater')).toEqual(resolveFixture('foo/reditum-quater'));
+    expect(await client.getData('sample-markdown.md')).toEqual(resolveFixture('sample-markdown.md'));
+    expect(await client.getData('foo/de-hostis-habetur.md')).toEqual(resolveFixture('foo/de-hostis-habetur.md'));
   });
 });
