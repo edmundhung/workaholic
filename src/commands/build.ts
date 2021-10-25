@@ -12,27 +12,54 @@ interface BuildWorkerOptions {
   target?: string;
 }
 
-function workaholicWorkerPlugin(suffixMatcher: RegExp, options: Pick<BuildWorkerOptions, 'basename' | 'binding' | 'plugins'>): Plugin {
+
+
+async function getPluginExport(plugin: PluginConfig): Promise<string[]> {
+  const result = await build({
+    entryPoints: [plugin.source],
+    platform: 'neutral',
+    format: 'esm',
+    metafile: true,
+    write: false,
+    logLevel: 'silent',
+  });
+
+  let { metafile } = result;
+
+  if (metafile) {
+    for (let key in metafile.outputs) {
+      let output = metafile.outputs[key];
+
+      if (output.entryPoint) {
+        return output.exports;
+      }
+    }
+  }
+
+  throw new Error(`Unable to get exports for plugin ${plugin.source}`);
+}
+
+function workaholicWorkerPlugin(workerMatcher: RegExp, options: Pick<BuildWorkerOptions, 'basename' | 'binding' | 'plugins'>): Plugin {
   return {
     name: 'workaholic-worker',
     setup(build: PluginBuild) {
-      build.onResolve({ filter: suffixMatcher }, args => {
+      build.onResolve({ filter: workerMatcher }, args => {
         return { namespace: 'workaholic-worker', path: args.path };
       });
 
-      build.onLoad({ namespace: 'workaholic-worker', filter: suffixMatcher }, async args => {
-          const file = args.path.replace(suffixMatcher, '');
-          const imports = options.plugins?.map((plugin, i) => `import * as plugin${i} from ${JSON.stringify(plugin.source)};`) ?? [];
-          const enhancers = options.plugins?.map((plugin, i) => `plugin${i}.setupQuery()`) ?? [];
+      build.onLoad({ namespace: 'workaholic-worker', filter: workerMatcher }, async args => {
+          const file = args.path.replace(workerMatcher, '');
+          const exports = await Promise.all(options.plugins?.map(plugin => getPluginExport(plugin)) ?? []);
+          const plugins = options.plugins?.filter((_, i) => exports[i].includes('setupQuery')) ?? [];
+          const imports = plugins.map((plugin, i) => `import * as plugin${i} from ${JSON.stringify(plugin.source)};`) ?? [];
+          const enhancers = plugins.map((_, i) => `plugin${i}.setupQuery()`) ?? [];
           const contents = `
 import { createRequestHandler } from ${JSON.stringify(file)};
 ${imports.join('\n')}
 
 const handleRequest = createRequestHandler(${options.binding}, {
   basename: '${options.basename}',
-  enhancers: [
-    ${enhancers.join(',\n    ')}
-  ],
+  enhancers: [${enhancers.join(', ')}],
 });
 
 addEventListener('fetch', event => event.respondWith(handleRequest(event.request)));

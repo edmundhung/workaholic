@@ -28,9 +28,13 @@ async function bootstrap({ basename, binding, plugins = [] }: Options) {
     builds: plugins.map(config => require(config.source).setupBuild(config.options)),
   });
   const kvNamespace = await preview(mf, binding, entries);
+  const enhancers = plugins
+    .map(config => require(config.source))
+    .filter(plugin => typeof plugin.setupQuery !== 'undefined')
+    .map(plugin => plugin.setupQuery());
 
   return {
-    query: createQuery(kvNamespace, plugins.map(config => require(config.source).setupQuery()) ?? []),
+    query: createQuery(kvNamespace, enhancers),
     async request(path: string, init?: RequestInit): [number, any] {
       const response = await mf.dispatchFetch(`http://localhost${path}`, init);
 
@@ -61,6 +65,7 @@ describe('worker', () => {
       binding: 'TEST2',
       plugins: [
         { source: path.resolve(__dirname, '../src/plugins/plugin-list') },
+        { source: path.resolve(__dirname, '../src/plugins/plugin-json') },
       ],
     });
 
