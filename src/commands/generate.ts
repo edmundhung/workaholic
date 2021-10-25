@@ -26,7 +26,7 @@ async function parseFile(root: string, filePath: string): Promise<Entry> {
 
   return {
     key,
-    value,
+    value: value.replace(/\r/g, ''),
   };
 }
 
