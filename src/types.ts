@@ -18,7 +18,12 @@ export type Query<Payload = any> = (namespace: string, path: string, options?: R
 export interface Config {
   binding: string;
   source: string;
+  site?: SiteConfig;
   plugins?: Array<PluginConfig>
+}
+
+export interface SiteConfig {
+  basename?: string;
 }
 
 export interface PluginConfig {

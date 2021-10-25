@@ -5,13 +5,14 @@ import type { PluginConfig } from '../types';
 import { getWranglerConfig, getWranglerDirectory } from '../utils';
 
 interface BuildWorkerOptions {
+  basename: string;
   binding: string;
   minify?: boolean;
   plugins?: PluginConfig[]
   target?: string;
 }
 
-function workaholicWorkerPlugin(binding: string, plugins: PluginConfig[], suffixMatcher: RegExp): Plugin {
+function workaholicWorkerPlugin(suffixMatcher: RegExp, options: Pick<BuildWorkerOptions, 'basename' | 'binding' | 'plugins'>): Plugin {
   return {
     name: 'workaholic-worker',
     setup(build: PluginBuild) {
@@ -21,15 +22,18 @@ function workaholicWorkerPlugin(binding: string, plugins: PluginConfig[], suffix
 
       build.onLoad({ namespace: 'workaholic-worker', filter: suffixMatcher }, async args => {
           const file = args.path.replace(suffixMatcher, '');
-          const imports = plugins.map((plugin, i) => `import * as plugin${i} from ${JSON.stringify(plugin.source)};`);
-          const enhancers = plugins.map((plugin, i) => `plugin${i}.setupQuery()`);
+          const imports = options.plugins?.map((plugin, i) => `import * as plugin${i} from ${JSON.stringify(plugin.source)};`) ?? [];
+          const enhancers = options.plugins?.map((plugin, i) => `plugin${i}.setupQuery()`) ?? [];
           const contents = `
 import { createRequestHandler } from ${JSON.stringify(file)};
 ${imports.join('\n')}
 
-const handleRequest = createRequestHandler(${binding}, [
-  ${enhancers.join('\n  ')}
-]);
+const handleRequest = createRequestHandler(${options.binding}, {
+  basename: '${options.basename}',
+  enhancers: [
+    ${enhancers.join(',\n    ')}
+  ],
+});
 
 addEventListener('fetch', event => event.respondWith(handleRequest(event.request)));
           `;
@@ -37,7 +41,7 @@ addEventListener('fetch', event => event.respondWith(handleRequest(event.request
           return {
             contents: contents.trim(),
             resolveDir: path.dirname(file),
-            loader: "js"
+            loader: 'js',
           };
         }
       );
@@ -54,7 +58,11 @@ export default async function buildWorker(options: BuildWorkerOptions): Promise<
     minify: options.minify ?? false,
     format: 'esm',
     plugins: [
-      workaholicWorkerPlugin(options.binding, options.plugins ?? [], /\?worker$/),
+      workaholicWorkerPlugin(/\?worker$/, {
+        basename: options.basename,
+        binding: options.binding,
+        plugins: options.plugins ?? [],
+      }),
     ],
   });
 
@@ -84,6 +92,7 @@ export function makeBuildCommand(): Command {
       const workaholic = config.getWorkaholicConfig();
 
       await buildWorker({
+        basename: workaholic.site?.basename ?? '/',
         target: path.resolve(process.cwd(), output),
         binding: workaholic.binding,
         minify: options.minify,
