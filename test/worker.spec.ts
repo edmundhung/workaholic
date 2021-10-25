@@ -1,4 +1,6 @@
 import { Miniflare } from 'miniflare';
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
 import path from 'path';
 import build from '../src/commands/build';
 import generate from '../src/commands/generate';
@@ -36,7 +38,7 @@ async function bootstrap({ basename, binding, plugins = [] }: Options) {
   return {
     query: createQuery(kvNamespace, enhancers),
     async request(path: string, init?: RequestInit): [number, any] {
-      const response = await mf.dispatchFetch(`http://localhost${path}`, init);
+      const response = await mf.dispatchFetch(`http://test.workaholic.site${path}`, init);
 
       if (response.status !== 200) {
         return [response.status, null];
@@ -48,6 +50,20 @@ async function bootstrap({ basename, binding, plugins = [] }: Options) {
 }
 
 describe('worker', () => {
+  const server = setupServer();
+
+  beforeAll(() => {
+    server.listen();
+  });
+
+  afterEach(() => {
+    server.resetHandlers();
+  })
+
+  afterAll(() => {
+    server.close();
+  });
+
   it('maps url the pathname to query and response based on the result', async () => {
     const { query, request } = await bootstrap({
       binding: 'TEST1',
@@ -76,13 +92,37 @@ describe('worker', () => {
   });
 
   it('works with custom basename', async () => {
-    const { query, request } = await bootstrap({
+    const { query, request, listen } = await bootstrap({
       basename: '/api',
       binding: 'TEST3',
     });
 
     expect(await request('/api/data/sample-json.json')).toEqual([200, await query('data', 'sample-json.json')]);
     expect(await request('/api/data')).toEqual([404, null]);
-    expect(await request('/data/sample-json.json')).toEqual([500, null]);
+  });
+
+  it('forwards the request to the origin if the request url does not match the basename', async () => {
+    server.use(
+      rest.get('http://test.workaholic.site/foo', (req, res, ctx) => {
+        return res(
+          ctx.status(400),
+          ctx.text(`Bad Request`),
+        );
+      }),
+      rest.get('http://test.workaholic.site/bar', (req, res, ctx) => {
+        return res(
+          ctx.status(418),
+          ctx.text(`I'm a teapot`),
+        );
+      }),
+    );
+
+    const { query, request, listen } = await bootstrap({
+      basename: '/foo',
+      binding: 'TEST4',
+    });
+
+    expect(await request('/foo')).toEqual([404, null]);
+    expect(await request('/bar')).toEqual([418, null]);
   });
 });
