@@ -28,6 +28,7 @@
     "url": "https://github.com/edmundhung/workaholic/issues"
   },
   "files": [
+    "src",
     "dist",
     "template"
   ],

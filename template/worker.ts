@@ -1,5 +1,5 @@
-import { createQuery } from '../dist';
-import type { QueryEnhancer } from '../dist/types';
+import createQuery from '../src/createQuery';
+import type { QueryEnhancer } from '../src/types';
 
 interface CreateRequestHandlerOptions {
   basename: string;

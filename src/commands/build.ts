@@ -12,8 +12,6 @@ interface BuildWorkerOptions {
   target?: string;
 }
 
-
-
 async function getPluginExport(plugin: PluginConfig): Promise<string[]> {
   const result = await build({
     entryPoints: [plugin.source],
@@ -39,15 +37,15 @@ async function getPluginExport(plugin: PluginConfig): Promise<string[]> {
   throw new Error(`Unable to get exports for plugin ${plugin.source}`);
 }
 
-function workaholicWorkerPlugin(workerMatcher: RegExp, options: Pick<BuildWorkerOptions, 'basename' | 'binding' | 'plugins'>): Plugin {
+function workaholicSitePlugin(workerMatcher: RegExp, options: Pick<BuildWorkerOptions, 'basename' | 'binding' | 'plugins'>): Plugin {
   return {
-    name: 'workaholic-worker',
+    name: 'workaholic-site',
     setup(build: PluginBuild) {
       build.onResolve({ filter: workerMatcher }, args => {
-        return { namespace: 'workaholic-worker', path: args.path };
+        return { namespace: 'workaholic-site', path: args.path };
       });
 
-      build.onLoad({ namespace: 'workaholic-worker', filter: workerMatcher }, async args => {
+      build.onLoad({ namespace: 'workaholic-site', filter: workerMatcher }, async args => {
           const file = args.path.replace(workerMatcher, '');
           const exports = await Promise.all(options.plugins?.map(plugin => getPluginExport(plugin)) ?? []);
           const plugins = options.plugins?.filter((_, i) => exports[i].includes('setupQuery')) ?? [];
@@ -78,14 +76,14 @@ addEventListener('fetch', event => event.respondWith(handleRequest(event.request
 
 export default async function buildWorker(options: BuildWorkerOptions): Promise<string | null> {
   const result = await build({
-    entryPoints: [path.resolve(__dirname, '../../template/worker.ts?worker')],
+    entryPoints: [path.resolve(__dirname, '../../template/worker.ts?site')],
     outfile: options.target,
     write: !!options.target,
     bundle: true,
     minify: options.minify ?? false,
     format: 'esm',
     plugins: [
-      workaholicWorkerPlugin(/\?worker$/, {
+      workaholicSitePlugin(/\?site$/, {
         basename: options.basename,
         binding: options.binding,
         plugins: options.plugins ?? [],
@@ -120,9 +118,19 @@ export function makeBuildCommand(): Command {
 
       await buildWorker({
         basename: workaholic.site?.basename ?? '/',
-        target: path.resolve(process.cwd(), output),
         binding: workaholic.binding,
         minify: options.minify,
+        plugins: workaholic.plugins?.map(plugin => ({
+          ...plugin,
+          source: plugin.source.startsWith('.') ? path.resolve(root, plugin.source) : plugin.source,
+        })) ?? [
+          { source: path.resolve(__dirname, '../../src/plugins/plugin-json.ts') },
+          { source: path.resolve(__dirname, '../../src/plugins/plugin-md.ts') },
+          { source: path.resolve(__dirname, '../../src/plugins/plugin-yaml.ts') },
+          { source: path.resolve(__dirname, '../../src/plugins/plugin-toml.ts') },
+          { source: path.resolve(__dirname, '../../src/plugins/plugin-list.ts') },
+        ],
+        target: path.resolve(process.cwd(), output),
       });
     });
 
