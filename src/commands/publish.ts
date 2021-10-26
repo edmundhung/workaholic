@@ -30,9 +30,9 @@ export function makePublishCommand(): Command {
       console.log('[workaholic] Reading config from wrangler.toml');
       const root = await getWranglerDirectory();
       const config = await getWranglerConfig(root);
-      const { binding } = config.getWorkaholicConfig();
+      const workaholic = config.getWorkaholicConfig();
       const accountId = config.getAccountId();
-      const namespaceId = config.getNamespaceId(binding, options.preview);
+      const namespaceId = config.getNamespaceId(workaholic.binding, options.preview);
       const token = process.env.CF_API_TOKEN;
 
       if (!namespaceId) {
@@ -45,7 +45,7 @@ export function makePublishCommand(): Command {
         return;
       }
 
-      console.log(`[workaholic] Updating KV with binding "${options.binding}" for account "${accountId}" and namespace "${namespaceId}"`);
+      console.log(`[workaholic] Updating KV with binding "${workaholic.binding}" for account "${accountId}" and namespace "${namespaceId}"`);
       const response = await publish(entries, { accountId, namespaceId, token });
       const result = await response.text();
       console.log(`[workaholic] Update finish with status ${response.status} and result ${result}`);

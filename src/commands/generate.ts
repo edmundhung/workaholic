@@ -97,7 +97,7 @@ async function resolvePlugin(root: string, config: PluginConfig): Promise<Build>
   const target = path.resolve(root, './node_modules/.workaholic/', config.source);
 
   await build({
-    entryPoints: [path.resolve(root, config.source)],
+    entryPoints: [config.source.startsWith('.') ? path.resolve(root, config.source) : config.source],
     outfile: target,
     format: 'cjs',
     target: 'node12',
