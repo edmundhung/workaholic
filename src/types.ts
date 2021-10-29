@@ -1,6 +1,4 @@
-export type Metadata = {
-  [key: string]: any | undefined;
-}
+export type Metadata = Record<string, any>;
 
 export interface Entry {
   key: string;
@@ -28,7 +26,8 @@ export interface SiteConfig {
 
 export interface PluginConfig {
   source: string;
-  options?: Record<string, any>;
+  buildOptions?: Record<string, any>;
+  queryOptions?: Record<string, any>;
 }
 
 export interface Plugin {
@@ -45,7 +44,7 @@ export interface Build {
 }
 
 export interface Handler<Payload = any> {
-  (slug: string, options: Record<string, any>): Promise<Payload | null>;
+  (path: string, options: Record<string, any>): Promise<Payload | null>;
 }
 
 export interface HandlerFactory<Payload = any> {

@@ -50,7 +50,7 @@ function workaholicSitePlugin(workerMatcher: RegExp, options: Pick<BuildWorkerOp
           const exports = await Promise.all(options.plugins?.map(plugin => getPluginExport(plugin)) ?? []);
           const plugins = options.plugins?.filter((_, i) => exports[i].includes('setupQuery')) ?? [];
           const imports = plugins.map((plugin, i) => `import * as plugin${i} from ${JSON.stringify(plugin.source)};`) ?? [];
-          const enhancers = plugins.map((_, i) => `plugin${i}.setupQuery()`) ?? [];
+          const enhancers = plugins.map((plugin, i) => `plugin${i}.setupQuery(${plugin.queryOptions ? JSON.stringify(plugin.queryOptions) : ''})`) ?? [];
           const contents = `
 import { createRequestHandler } from ${JSON.stringify(file)};
 ${imports.join('\n')}

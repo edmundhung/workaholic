@@ -103,7 +103,7 @@ async function resolvePlugin(root: string, config: PluginConfig): Promise<Build>
     target: 'node12',
   });
 
-  return require(target).setupBuild(config.options);
+  return require(target).setupBuild(config.buildOptions);
 }
 
 export function makeGenerateCommand(): Command {
