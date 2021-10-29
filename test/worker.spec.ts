@@ -85,10 +85,10 @@ describe('worker', () => {
       ],
     });
 
-    expect(await request('/references')).toEqual([200, await query('references', '')]);
-    expect(await request('/references/foo')).toEqual([200, await query('references', 'foo')]);
-    expect(await request('/references/foo?includeSubfolder=yes')).toEqual([200, await query('references', 'foo', { includeSubfolder: true })]);
-    expect(await request('/references/bar')).toEqual([404, null]);
+    expect(await request('/list')).toEqual([200, await query('list', '')]);
+    expect(await request('/list/foo')).toEqual([200, await query('list', 'foo')]);
+    expect(await request('/list/foo?includeSubfolder=yes')).toEqual([200, await query('list', 'foo', { includeSubfolder: true })]);
+    expect(await request('/list/bar')).toEqual([404, null]);
   });
 
   it('works with custom basename', async () => {
