@@ -3,11 +3,11 @@ import path from 'path';
 import generate from '../../src/commands/generate';
 import preview from '../../src/commands/preview';
 import createQuery from '../../src/createQuery';
-import { setupBuild } from '../../src/plugins/plugin-md';
+import { setupBuild } from '../../src/plugins/plugin-frontmatter';
 import { Entry } from '../../src/types';
 import data from '../fixtures/sample-json.json';
 
-describe('plugin-md', () => {
+describe('plugin-frontmatter', () => {
   let entries: Entry[];
   let namespace: KVNamespace;
 
@@ -24,7 +24,7 @@ describe('plugin-md', () => {
     namespace = await preview(mf, 'test', entries);
   });
 
-  it('transforms data by parsing md content', async () => {
+  it('transforms data by parsing frontmatter from markdown file', async () => {
     const query = createQuery(namespace);
     const { metadata, ...content } = data;
 

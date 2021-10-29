@@ -14,7 +14,7 @@ interface GenerateOptions {
 
 const defaultPlugins = [
   require('../plugins/plugin-json'),
-  require('../plugins/plugin-md'),
+  require('../plugins/plugin-frontmatter'),
   require('../plugins/plugin-yaml'),
   require('../plugins/plugin-toml'),
   require('../plugins/plugin-list'),

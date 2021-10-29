@@ -125,7 +125,7 @@ export function makeBuildCommand(): Command {
           source: plugin.source.startsWith('.') ? path.resolve(root, plugin.source) : plugin.source,
         })) ?? [
           { source: path.resolve(__dirname, '../../src/plugins/plugin-json.ts') },
-          { source: path.resolve(__dirname, '../../src/plugins/plugin-md.ts') },
+          { source: path.resolve(__dirname, '../../src/plugins/plugin-frontmatter.ts') },
           { source: path.resolve(__dirname, '../../src/plugins/plugin-yaml.ts') },
           { source: path.resolve(__dirname, '../../src/plugins/plugin-toml.ts') },
           { source: path.resolve(__dirname, '../../src/plugins/plugin-list.ts') },
