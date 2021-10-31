@@ -9,7 +9,7 @@ export interface Reference {
 export const setupBuild: SetupBuildFunction = () => {
   return {
     namespace: 'references',
-    derive(entries: Entry[]): Entry[] {
+    index(entries: Entry[]): Entry[] {
       let referencesByKey: Record<string, Reference[]> = {};
 
       for (const entry of entries) {

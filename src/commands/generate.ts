@@ -48,12 +48,6 @@ async function parseDirectory(source: string, directoryPath = source): Promise<E
   return list;
 }
 
-
-
-function defaultDerive(entries: Entry[]): Promise<Entry[]> {
-  return Promise.resolve([]);
-}
-
 function createTransform(builds: Build[]): (entries: Entry[]) => Promise<Entry[]> {
   const defaultTransform = (entry: Entry): Promise<Entry> => Promise.resolve(entry);
   const transform = builds.reduce((fn, build) => (entry: Entry) => fn(entry).then(build.transform ?? defaultTransform), defaultTransform);
@@ -72,12 +66,12 @@ export default async function generate({ source, builds = [] }: GenerateOptions)
   const data = assignNamespace('data', entries);
   const derived = await Promise.all(
     builds.reduce((result, build) => {
-      if (!build.derive) {
+      if (!build.index) {
         return result;
       }
 
       const promise = Promise
-        .resolve(build.derive(entries))
+        .resolve(build.index(entries))
         .then(entries => {
           if (!build.namespace) {
             throw new Error('[Workaholic] namespace is required for deriving entries');
