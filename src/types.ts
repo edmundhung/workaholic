@@ -55,3 +55,5 @@ export interface QueryEnhancer<Payload = any> {
   namespace: string;
   handlerFactory: HandlerFactory<Payload>;
 }
+
+export type SetupQueryFunction<Payload = any> = (options?: Record<string, any>) => QueryEnhancer<Payload>;
