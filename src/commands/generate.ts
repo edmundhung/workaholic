@@ -106,17 +106,19 @@ export function makeGenerateCommand(): Command {
   command
     .description('Generate worker kv data')
     .argument('<output>', 'output file path')
-    .action(async (output) => {
+    .option('--source [path]', 'path of the source directory')
+    .action(async (output, options) => {
+      const cwd = process.cwd();
       const root = await getWranglerDirectory();
       const config = await getWranglerConfig(root);
-      const options = config.getWorkaholicConfig();
-      const builds = options.plugins ? await Promise.all(options.plugins.map(plugin => resolvePlugin(root, plugin))) : defaultPlugins.map<Build>(plugin => plugin.setupBuild());
+      const workaholic = config.getWorkaholicConfig();
+      const builds = workaholic.plugins ? await Promise.all(workaholic.plugins.map(plugin => resolvePlugin(root, plugin))) : defaultPlugins.map<Build>(plugin => plugin.setupBuild());
       const entries = await generate({
-        source: path.resolve(root, options.source),
+        source: path.resolve(root, options.source ? path.resolve(cwd, options.source) : workaholic.source),
         builds,
       });
 
-      fs.promises.writeFile(path.resolve(process.cwd(), output), JSON.stringify(entries, null, 2));
+      fs.promises.writeFile(path.resolve(cwd, output), JSON.stringify(entries, null, 2));
     });
 
   return command;
