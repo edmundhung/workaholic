@@ -30,18 +30,16 @@ async function parseFile(root: string, filePath: string): Promise<Entry> {
   };
 }
 
-async function parseDirectory(source: string, directoryPath = source): Promise<Entry[]> {
-  let list: Entry[] = [];
+async function parseDirectory(directory: string): Promise<string[]> {
+  let list: string[] = [];
 
-  for (const dirent of await fs.promises.readdir(directoryPath, { withFileTypes: true })) {
+  for (const dirent of await fs.promises.readdir(directory, { withFileTypes: true })) {
     if (dirent.isDirectory()) {
-      const entries = await parseDirectory(source, `${directoryPath}/${dirent.name}`);
+      const paths = await parseDirectory(`${directory}/${dirent.name}`);
 
-      list.push(...entries);
+      list.push(...paths);
     } else if (dirent.isFile()) {
-      const entry = await parseFile(source, `${directoryPath}/${dirent.name}`);
-
-      list.push(entry);
+      list.push(`${directory}/${dirent.name}`);
     }
   }
 
@@ -61,8 +59,9 @@ function assignNamespace(namespace: string, entries: Entry[]): Entry[] {
 
 export default async function generate({ source, builds = [] }: GenerateOptions): Promise<Entry[]> {
   const files = await parseDirectory(source);
+  const inputs = await Promise.all(files.map(file => parseFile(source, file)));
   const transform = createTransform(builds);
-  const entries = await transform(files);
+  const entries = await transform(inputs);
   const data = assignNamespace('data', entries);
   const derived = await Promise.all(
     builds.reduce((result, build) => {
