@@ -22,7 +22,7 @@ describe('createQuery', () => {
       const kv = fixtures.find(kv => kv.key === `data/${slug}`);
 
       return {
-        content: kv?.value ?? null,
+        value: kv?.value ?? null,
         metadata: kv?.metadata ?? null,
       };
     };

@@ -7,7 +7,7 @@ export interface Entry {
 }
 
 export interface Data {
-  content: string | null;
+  value: string | null;
   metadata: Metadata | null;
 }
 

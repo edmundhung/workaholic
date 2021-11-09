@@ -26,10 +26,10 @@ describe('plugin-frontmatter', () => {
 
   it('transforms data by parsing frontmatter from markdown file', async () => {
     const query = createQuery(namespace);
-    const { metadata, ...content } = data;
+    const { metadata } = data;
 
     expect(await query('data', 'sample-markdown')).toEqual({
-      content: `
+      value: `
 # Mulcet vincere
 
 ## Vel longoque coniugialia erat
