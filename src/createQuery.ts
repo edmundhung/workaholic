@@ -4,7 +4,7 @@ const defaultEnhancer: QueryEnhancer<Data> = {
   namespace: 'data',
   handlerFactory: namespace => {
     return async (slug): Promise<Data | null> => {
-      const data = await namespace.getWithMetadata<any, Metadata>(`data/${slug}`, 'text');
+      const data = await namespace.getWithMetadata<Metadata>(`data/${slug}`, 'text');
 
       if (!data.value && !data.metadata) {
         return null;
