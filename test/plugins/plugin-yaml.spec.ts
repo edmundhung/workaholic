@@ -19,7 +19,9 @@ describe('plugin-yaml', () => {
 
     entries = await generate({
       source: path.resolve(__dirname, '../fixtures'),
-      builds: [setupBuild()],
+      plugins: [
+        { source: path.resolve(__dirname, '../../src/plugins/plugin-yaml') },
+      ],
     });
     namespace = await preview(mf, 'test', entries);
   });

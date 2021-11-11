@@ -3,7 +3,7 @@ import path from 'path';
 import generate from '../../src/commands/generate';
 import preview from '../../src/commands/preview';
 import createQuery from '../../src/createQuery';
-import { setupBuild, setupQuery } from '../../src/plugins/plugin-list';
+import { setupQuery } from '../../src/plugins/plugin-list';
 import { Entry } from '../../src/types';
 
 describe('plugin-list', () => {
@@ -18,7 +18,9 @@ describe('plugin-list', () => {
 
     entries = await generate({
       source: path.resolve(__dirname, '../fixtures'),
-      builds: [setupBuild()],
+      plugins: [
+        { source: path.resolve(__dirname, '../../src/plugins/plugin-list') },
+      ],
     });
     namespace = await preview(mf, 'test', entries);
   });

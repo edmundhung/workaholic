@@ -27,7 +27,7 @@ async function bootstrap({ basename, binding, plugins = [] }: Options) {
   });
   const entries = await generate({
     source: path.resolve(__dirname, './fixtures'),
-    builds: plugins.map(config => require(config.source).setupBuild(config.options)),
+    plugins
   });
   const kvNamespace = await preview(mf, binding, entries);
   const enhancers = plugins

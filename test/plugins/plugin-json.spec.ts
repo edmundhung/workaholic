@@ -19,7 +19,9 @@ describe('plugin-json', () => {
 
     entries = await generate({
       source: path.resolve(__dirname, '../fixtures'),
-      builds: [setupBuild()],
+      plugins: [
+        { source: path.resolve(__dirname, '../../src/plugins/plugin-json') },
+      ],
     });
     namespace = await preview(mf, 'test', entries);
   });

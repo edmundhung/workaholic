@@ -19,7 +19,9 @@ describe('plugin-toml', () => {
 
     entries = await generate({
       source: path.resolve(__dirname, '../fixtures'),
-      builds: [setupBuild()],
+      plugins: [
+        { source: path.resolve(__dirname, '../../src/plugins/plugin-toml') },
+      ],
     });
     namespace = await preview(mf, 'test', entries);
   });

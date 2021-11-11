@@ -9,16 +9,8 @@ import { getRelativePath, getWranglerConfig, getWranglerDirectory } from '../uti
 
 interface GenerateOptions {
   source: string;
-  builds?: Build[];
+  plugins?: PluginConfig[];
 }
-
-const defaultPlugins = [
-  require('../plugins/plugin-json'),
-  require('../plugins/plugin-frontmatter'),
-  require('../plugins/plugin-yaml'),
-  require('../plugins/plugin-toml'),
-  require('../plugins/plugin-list'),
-];
 
 async function parseFile(root: string, filePath: string): Promise<Entry> {
   const value = await fs.promises.readFile(filePath, { encoding: 'utf-8' });
@@ -65,9 +57,10 @@ function assignNamespace(namespace: string, entries: Entry[]): Entry[] {
   return entries.map<Entry>(entry => ({ ...entry, key: `${namespace}/${entry.key}` }));
 }
 
-export default async function generate({ source, builds = [] }: GenerateOptions): Promise<Entry[]> {
+export default async function generate({ source, plugins = [] }: GenerateOptions): Promise<Entry[]> {
   const files = await parseDirectory(source);
   const inputs = await Promise.all(files.map(file => parseFile(source, file)));
+  const builds = plugins.map(initialiseBuild);
   const transform = createTransform(builds);
   const entries = await transform(inputs);
   const data = assignNamespace('data', entries);
@@ -94,7 +87,7 @@ export default async function generate({ source, builds = [] }: GenerateOptions)
   return derived.reduce((result, entries) => result.concat(entries), data);
 }
 
-async function resolvePlugin(root: string, config: PluginConfig): Promise<Build> {
+async function resolvePlugin(root: string, config: PluginConfig): Promise<PluginConfig> {
   const target = path.resolve(root, './node_modules/.workaholic/', config.source);
 
   await build({
@@ -104,7 +97,11 @@ async function resolvePlugin(root: string, config: PluginConfig): Promise<Build>
     target: 'node12',
   });
 
-  return require(target).setupBuild(config.buildOptions);
+  return { ...config, source: target };
+}
+
+function initialiseBuild(plugin: PluginConfig): Build {
+  return require(plugin.source).setupBuild(plugin.buildOptions);
 }
 
 export function makeGenerateCommand(): Command {
@@ -119,10 +116,17 @@ export function makeGenerateCommand(): Command {
       const root = await getWranglerDirectory();
       const config = await getWranglerConfig(root);
       const workaholic = config.getWorkaholicConfig();
-      const builds = workaholic.plugins ? await Promise.all(workaholic.plugins.map(plugin => resolvePlugin(root, plugin))) : defaultPlugins.map<Build>(plugin => plugin.setupBuild());
       const entries = await generate({
         source: path.resolve(root, options.source ? path.resolve(cwd, options.source) : workaholic.source),
-        builds,
+        plugins: workaholic.plugins
+          ? await Promise.all(workaholic.plugins.map(plugin => resolvePlugin(root, plugin)))
+          : [
+            { source: '../plugins/plugin-json' },
+            { source: '../plugins/plugin-frontmatter' },
+            { source: '../plugins/plugin-yaml' },
+            { source: '../plugins/plugin-toml' },
+            { source: '../plugins/plugin-list' },
+          ],
       });
 
       fs.promises.writeFile(path.resolve(cwd, output), JSON.stringify(entries, null, 2));

@@ -19,7 +19,9 @@ describe('plugin-frontmatter', () => {
 
     entries = await generate({
       source: path.resolve(__dirname, '../fixtures'),
-      builds: [setupBuild()],
+      plugins: [
+        { source: path.resolve(__dirname, '../../src/plugins/plugin-frontmatter') },
+      ],
     });
     namespace = await preview(mf, 'test', entries);
   });
