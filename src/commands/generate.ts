@@ -47,10 +47,18 @@ async function parseDirectory(directory: string): Promise<string[]> {
 }
 
 function createTransform(builds: Build[]): (entries: Entry[]) => Promise<Entry[]> {
-  const defaultTransform = (entry: Entry): Promise<Entry> => Promise.resolve(entry);
-  const transform = builds.reduce((fn, build) => (entry: Entry) => fn(entry).then(build.transform ?? defaultTransform), defaultTransform);
+  const transform = builds.reduce((fn, build) => async (entry: Entry): Promise<Entry[]> => {
+    if (!build.transform) {
+      return [entry];
+    }
 
-  return (entries: Entry[]) => Promise.all(entries.map(entry => transform(entry)));
+    const entries = await fn(entry);
+    const result = await Promise.all(entries.map(build.transform));
+
+    return result.flat();
+  }, (entry: Entry) => Promise.resolve([entry]));
+
+  return (entries: Entry[]) => Promise.all(entries.map(transform)).then(result => result.flat());
 }
 
 function assignNamespace(namespace: string, entries: Entry[]): Entry[] {

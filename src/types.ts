@@ -37,10 +37,12 @@ export interface Plugin {
 
 export type SetupBuildFunction = (options?: Record<string, any>) => Build;
 
+export type MaybePromise<T> = T | Promise<T>;
+
 export interface Build {
   namespace?: string;
-  transform?: (entry: Entry) => Entry | Promise<Entry>;
-  index?: (entries: Entry[]) => Entry[] | Promise<Entry[]>;
+  transform?: (entry: Entry) => MaybePromise<Entry | Entry[]>;
+  index?: (entries: Entry[]) => MaybePromise<Entry[]>;
 }
 
 export interface Handler<Payload = any> {
