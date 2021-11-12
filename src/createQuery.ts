@@ -2,18 +2,17 @@ import type { Handler, HandlerFactory, QueryEnhancer, Metadata, Data, Query } fr
 
 const defaultEnhancer: QueryEnhancer<Data> = {
   namespace: 'data',
-  handlerFactory: namespace => {
-    return async (slug): Promise<Data | null> => {
-      const data = await namespace.getWithMetadata<Metadata>(`data/${slug}`, 'text');
+  handlerFactory: kvNamespace => async (namespace, slug): Promise<Data | null> => {
+    const data = await kvNamespace.getWithMetadata<Metadata>(`${namespace}/${slug}`, 'text');
 
-      if (!data.value && !data.metadata) {
-        return null;
-      }
+    if (!data.value && !data.metadata) {
+      return null;
+    }
 
-      return data;
-    };
+    return data;
   },
 };
+
 
 function createQuery(kvNamespace: KVNamespace, enhancers: QueryEnhancer[] = []): Query {
   const map = new Map<string, Handler>();
@@ -33,10 +32,10 @@ function createQuery(kvNamespace: KVNamespace, enhancers: QueryEnhancer[] = []):
       return null;
     }
 
-    return handler(path, options ?? {});
+    return handler(namespace, path, options ?? {});
   }
 
-  for (const enhancer of [defaultEnhancer, ...enhancers]) {
+  for (const enhancer of (enhancers.length > 0 ? enhancers : [defaultEnhancer])) {
     register(enhancer.namespace, enhancer.handlerFactory);
   }
 

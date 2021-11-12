@@ -8,7 +8,7 @@ interface BuildWorkerOptions {
   basename: string;
   binding: string;
   minify?: boolean;
-  plugins?: PluginConfig[]
+  output?: Record<string, PluginConfig>;
   target?: string;
 }
 
@@ -37,7 +37,7 @@ async function getPluginExport(plugin: PluginConfig): Promise<string[]> {
   throw new Error(`Unable to get exports for plugin ${plugin.source}`);
 }
 
-function workaholicSitePlugin(workerMatcher: RegExp, options: Pick<BuildWorkerOptions, 'basename' | 'binding' | 'plugins'>): Plugin {
+function workaholicSitePlugin(workerMatcher: RegExp, options: Pick<BuildWorkerOptions, 'basename' | 'binding' | 'output'>): Plugin {
   return {
     name: 'workaholic-site',
     setup(build: PluginBuild) {
@@ -47,10 +47,11 @@ function workaholicSitePlugin(workerMatcher: RegExp, options: Pick<BuildWorkerOp
 
       build.onLoad({ namespace: 'workaholic-site', filter: workerMatcher }, async args => {
           const file = args.path.replace(workerMatcher, '');
-          const exports = await Promise.all(options.plugins?.map(plugin => getPluginExport(plugin)) ?? []);
-          const plugins = options.plugins?.filter((_, i) => exports[i].includes('setupQuery')) ?? [];
-          const imports = plugins.map((plugin, i) => `import * as plugin${i} from ${JSON.stringify(plugin.source)};`) ?? [];
-          const enhancers = plugins.map((plugin, i) => `plugin${i}.setupQuery(${plugin.queryOptions ? JSON.stringify(plugin.queryOptions) : ''})`) ?? [];
+          const outputs = Object.entries(options.output ?? {});
+          const exports = await Promise.all(outputs.map(async ([, plugin]) => await getPluginExport(plugin) ?? []));
+          const plugins = outputs.filter((_, i) => exports[i].includes('setupQuery')) ?? [];
+          const imports = plugins.map(([, plugin], i) => `import * as plugin${i} from ${JSON.stringify(plugin.source)};`) ?? [];
+          const enhancers = plugins.map(([namespace, plugin], i) => `{ namespace: ${JSON.stringify(namespace)}, handlerFactory: plugin${i}.setupQuery(${plugin.options ? JSON.stringify(plugin.options) : ''}) }`) ?? [];
           const contents = `
 import { createRequestHandler } from ${JSON.stringify(file)};
 ${imports.join('\n')}
@@ -86,7 +87,7 @@ export default async function buildWorker(options: BuildWorkerOptions): Promise<
       workaholicSitePlugin(/\?site$/, {
         basename: options.basename,
         binding: options.binding,
-        plugins: options.plugins ?? [],
+        output: options.output,
       }),
     ],
   });
@@ -120,16 +121,7 @@ export function makeBuildCommand(): Command {
         basename: workaholic.site?.basename ?? '/',
         binding: workaholic.binding,
         minify: options.minify,
-        plugins: workaholic.plugins?.map(plugin => ({
-          ...plugin,
-          source: plugin.source.startsWith('.') ? path.resolve(root, plugin.source) : plugin.source,
-        })) ?? [
-          { source: path.resolve(__dirname, '../../src/plugins/plugin-json.ts') },
-          { source: path.resolve(__dirname, '../../src/plugins/plugin-frontmatter.ts') },
-          { source: path.resolve(__dirname, '../../src/plugins/plugin-yaml.ts') },
-          { source: path.resolve(__dirname, '../../src/plugins/plugin-toml.ts') },
-          { source: path.resolve(__dirname, '../../src/plugins/plugin-list.ts') },
-        ],
+        output: workaholic.output,
         target: path.resolve(process.cwd(), output),
       });
     });

@@ -1,5 +1,5 @@
 
-import type { Query, Entry, Metadata, SetupBuildFunction, QueryEnhancer } from '../types';
+import type { Query, Entry, Metadata, SetupBuildFunction, SetupQueryFunction } from '../types';
 
 export interface Reference {
   slug: string;
@@ -8,7 +8,6 @@ export interface Reference {
 
 export const setupBuild: SetupBuildFunction = () => {
   return {
-    namespace: 'references',
     index(entries: Entry[]): Entry[] {
       let referencesByKey: Record<string, Reference[]> = {};
 
@@ -31,23 +30,20 @@ export const setupBuild: SetupBuildFunction = () => {
   };
 };
 
-export function setupQuery(): QueryEnhancer<Reference[]> {
-  return {
-    namespace: 'list',
-    handlerFactory: kvNamespace => async (path: string, { includeSubfolders }) => {
-      const references = await kvNamespace.get<Reference[]>(`references/${path}`, 'json');
+export const setupQuery: SetupQueryFunction<Reference[]> = () => {
+  return kvNamespace => async (namespace: string, path: string, { includeSubfolders }) => {
+    const references = await kvNamespace.get<Reference[]>(`${namespace}/${path}`, 'json');
 
-      if (!references) {
-        return null;
-      }
+    if (!references) {
+      return null;
+    }
 
-      if (includeSubfolders) {
-        return references;
-      }
+    if (includeSubfolders) {
+      return references;
+    }
 
-      const level = path !== '' ? path.split('/').length : 0;
+    const level = path !== '' ? path.split('/').length : 0;
 
-      return references.filter(ref => ref.slug.split('/').length === level + 1);
-    },
+    return references.filter(ref => ref.slug.split('/').length === level + 1);
   };
 }

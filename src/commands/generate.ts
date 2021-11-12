@@ -1,16 +1,13 @@
 import TOML from '@iarna/toml';
 import { Command } from 'commander';
-import { build } from 'esbuild';
+import { build, Plugin } from 'esbuild';
 import fs from 'fs';
 import matter from 'gray-matter';
 import path from 'path';
-import type { Build, Entry, PluginConfig } from '../types';
+import type { Build, Entry, PluginConfig, Config } from '../types';
 import { getRelativePath, getWranglerConfig, getWranglerDirectory } from '../utils';
 
-interface GenerateOptions {
-  source: string;
-  plugins?: PluginConfig[];
-}
+type GenerateOptions = Omit<Config, 'binding' | 'site'>;
 
 async function parseFile(root: string, filePath: string): Promise<Entry> {
   const value = await fs.promises.readFile(filePath, { encoding: 'utf-8' });
@@ -41,7 +38,7 @@ async function parseDirectory(directory: string): Promise<string[]> {
 function createTransform(builds: Build[]): (entries: Entry[]) => Promise<Entry[]> {
   const transform = builds.reduce((fn, build) => async (entry: Entry): Promise<Entry[]> => {
     if (!build.transform) {
-      return [entry];
+      throw new Error('[Workaholic] Missing transform from plugin');
     }
 
     const entries = await fn(entry);
@@ -57,34 +54,38 @@ function assignNamespace(namespace: string, entries: Entry[]): Entry[] {
   return entries.map<Entry>(entry => ({ ...entry, key: `${namespace}/${entry.key}` }));
 }
 
-export default async function generate({ source, plugins = [] }: GenerateOptions): Promise<Entry[]> {
+async function finalise(entries: Entry[], output?: Record<string, PluginConfig>): Promise<Entry[]> {
+  if (!output) {
+    return assignNamespace('data', entries);
+  }
+
+  const result = await Promise.all(
+    Object.entries(output).map(async ([namespace, plugin]) => {
+      const build = initialiseBuild(plugin);
+
+      if (!build.index) {
+        throw new Error('[Workaholic] output plugin must implement the index hook');
+      }
+
+      const data = await Promise.resolve(build.index(entries));
+      const result = assignNamespace(namespace, data);
+
+      return result;
+    })
+  );
+
+  return result.flat();
+}
+
+export default async function generate({ source, output, plugins = [] }: GenerateOptions): Promise<Entry[]> {
   const files = await parseDirectory(source);
   const inputs = await Promise.all(files.map(file => parseFile(source, file)));
   const builds = plugins.map(initialiseBuild);
   const transform = createTransform(builds);
   const entries = await transform(inputs);
-  const data = assignNamespace('data', entries);
-  const derived = await Promise.all(
-    builds.reduce((result, build) => {
-      if (!build.index) {
-        return result;
-      }
+  const result = await finalise(entries, output);
 
-      const promise = Promise
-        .resolve(build.index(entries))
-        .then(entries => {
-          if (!build.namespace) {
-            throw new Error('[Workaholic] namespace is required for deriving entries');
-          }
-
-          return assignNamespace(build.namespace, entries)
-        });
-
-      return result.concat(promise);
-    }, [] as Array<Promise<Entry[]>>)
-  );
-
-  return derived.reduce((result, entries) => result.concat(entries), data);
+  return result;
 }
 
 async function resolvePlugin(root: string, config: PluginConfig): Promise<PluginConfig> {
@@ -101,7 +102,7 @@ async function resolvePlugin(root: string, config: PluginConfig): Promise<Plugin
 }
 
 function initialiseBuild(plugin: PluginConfig): Build {
-  return require(plugin.source).setupBuild(plugin.buildOptions);
+  return require(plugin.source).setupBuild(plugin.options);
 }
 
 export function makeGenerateCommand(): Command {
@@ -118,6 +119,13 @@ export function makeGenerateCommand(): Command {
       const workaholic = config.getWorkaholicConfig();
       const entries = await generate({
         source: path.resolve(root, options.source ? path.resolve(cwd, options.source) : workaholic.source),
+        output: Object.fromEntries(
+          workaholic.output
+            ? await Promise.all(
+              Object.entries(workaholic.output).map(async ([namespace, plugin]) => [namespace, await resolvePlugin(root, plugin)])
+            )
+            : []
+        ),
         plugins: workaholic.plugins
           ? await Promise.all(workaholic.plugins.map(plugin => resolvePlugin(root, plugin)))
           : [

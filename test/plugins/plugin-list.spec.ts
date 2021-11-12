@@ -18,15 +18,15 @@ describe('plugin-list', () => {
 
     entries = await generate({
       source: path.resolve(__dirname, '../fixtures'),
-      plugins: [
-        { source: path.resolve(__dirname, '../../src/plugins/plugin-list') },
-      ],
+      output: {
+        list: { source: path.resolve(__dirname, '../../src/plugins/plugin-list') },
+      },
     });
     namespace = await preview(mf, 'test', entries);
   });
 
   it('handles the references query properly', async () => {
-    const query = createQuery(namespace, [setupQuery()]);
+    const query = createQuery(namespace, [{ namespace: 'list', handlerFactory: setupQuery() }]);
     const getReference = async (slug: string) => {
       const data = await query('data', slug);
 

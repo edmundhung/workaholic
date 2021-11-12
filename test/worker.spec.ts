@@ -6,19 +6,13 @@ import build from '../src/commands/build';
 import generate from '../src/commands/generate';
 import preview from '../src/commands/preview';
 import createQuery from '../src/createQuery';
-import type { PluginConfig, Query } from '../src/types';
+import type { Config, Query } from '../src/types';
 
-interface Options {
-  binding: string;
-  basename?: string;
-  plugins?: PluginConfig[];
-}
-
-async function bootstrap({ basename, binding, plugins = [] }: Options) {
+async function bootstrap({ site, binding, plugins, output }: Partial<Config>) {
   const script = await build({
-    basename: basename ?? '',
+    basename: site?.basename ?? '',
     binding,
-    plugins,
+    output,
   });
   const mf = new Miniflare({
     script,
@@ -27,13 +21,15 @@ async function bootstrap({ basename, binding, plugins = [] }: Options) {
   });
   const entries = await generate({
     source: path.resolve(__dirname, './fixtures'),
-    plugins
+    plugins,
+    output,
   });
   const kvNamespace = await preview(mf, binding, entries);
-  const enhancers = plugins
-    .map(config => require(config.source))
-    .filter(plugin => typeof plugin.setupQuery !== 'undefined')
-    .map(plugin => plugin.setupQuery());
+  const enhancers = !output ? [] : Object
+    .entries(output)
+    .map(([namespace, config]) => [namespace, require(config.source)])
+    .filter(([_, plugin]) => typeof plugin.setupQuery !== 'undefined')
+    .map(([namespace, plugin]) => ({ namespace, handlerFactory: plugin.setupQuery() }));
 
   return {
     query: createQuery(kvNamespace, enhancers),
@@ -80,9 +76,11 @@ describe('worker', () => {
     const { query, request } = await bootstrap({
       binding: 'TEST2',
       plugins: [
-        { source: path.resolve(__dirname, '../src/plugins/plugin-list') },
         { source: path.resolve(__dirname, '../src/plugins/plugin-json') },
       ],
+      output: {
+        list: { source: path.resolve(__dirname, '../src/plugins/plugin-list') },
+      },
     });
 
     expect(await request('/list')).toEqual([200, await query('list', '')]);
@@ -93,7 +91,7 @@ describe('worker', () => {
 
   it('works with custom basename', async () => {
     const { query, request, listen } = await bootstrap({
-      basename: '/api',
+      site: { basename: '/api' },
       binding: 'TEST3',
     });
 
@@ -118,7 +116,7 @@ describe('worker', () => {
     );
 
     const { query, request, listen } = await bootstrap({
-      basename: '/foo',
+      site: { basename: '/foo' },
       binding: 'TEST4',
     });
 

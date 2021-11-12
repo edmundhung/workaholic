@@ -16,6 +16,7 @@ export type Query<Payload = any> = (namespace: string, path: string, options?: R
 export interface Config {
   binding: string;
   source: string;
+  output?: Record<string, PluginConfig>;
   site?: SiteConfig;
   plugins?: Array<PluginConfig>
 }
@@ -26,13 +27,7 @@ export interface SiteConfig {
 
 export interface PluginConfig {
   source: string;
-  buildOptions?: Record<string, any>;
-  queryOptions?: Record<string, any>;
-}
-
-export interface Plugin {
-  name?: string;
-  setupBuild?: SetupBuildFunction;
+  options?: Record<string, any>;
 }
 
 export type SetupBuildFunction = (options?: Record<string, any>) => Build;
@@ -40,13 +35,12 @@ export type SetupBuildFunction = (options?: Record<string, any>) => Build;
 export type MaybePromise<T> = T | Promise<T>;
 
 export interface Build {
-  namespace?: string;
   transform?: (entry: Entry) => MaybePromise<Entry | Entry[]>;
   index?: (entries: Entry[]) => MaybePromise<Entry[]>;
 }
 
 export interface Handler<Payload = any> {
-  (path: string, options: Record<string, any>): Promise<Payload | null>;
+  (namespace: string, path: string, options: Record<string, any>): Promise<Payload | null>;
 }
 
 export interface HandlerFactory<Payload = any> {
@@ -58,4 +52,4 @@ export interface QueryEnhancer<Payload = any> {
   handlerFactory: HandlerFactory<Payload>;
 }
 
-export type SetupQueryFunction<Payload = any> = (options?: Record<string, any>) => QueryEnhancer<Payload>;
+export type SetupQueryFunction<Payload = any> = (options?: Record<string, any>) => HandlerFactory<Payload>;
