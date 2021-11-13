@@ -55,12 +55,14 @@ function assignNamespace(namespace: string, entries: Entry[]): Entry[] {
 }
 
 async function finalise(entries: Entry[], output?: Record<string, PluginConfig>): Promise<Entry[]> {
-  if (!output) {
+  const outputs = Object.entries(output ?? {});
+
+  if (outputs.length === 0) {
     return assignNamespace('data', entries);
   }
 
   const result = await Promise.all(
-    Object.entries(output).map(async ([namespace, plugin]) => {
+    outputs.map(async ([namespace, plugin]) => {
       const build = initialiseBuild(plugin);
 
       if (!build.index) {
