@@ -3,11 +3,11 @@ import path from 'path';
 import generate from '../../src/commands/generate';
 import preview from '../../src/commands/preview';
 import createQuery from '../../src/createQuery';
-import { setupBuild } from '../../src/plugins/plugin-json';
+import { setupBuild } from '../../src/plugins/plugin-metadata';
 import { Entry } from '../../src/types';
 import data from '../fixtures/sample-json.json';
 
-describe('plugin-json', () => {
+describe('plugin-metadata', () => {
   let entries: Entry[];
   let namespace: KVNamespace;
 
@@ -20,7 +20,7 @@ describe('plugin-json', () => {
     entries = await generate({
       source: path.resolve(__dirname, '../fixtures'),
       plugins: [
-        { source: path.resolve(__dirname, '../../src/plugins/plugin-json') },
+        { source: path.resolve(__dirname, '../../src/plugins/plugin-metadata') },
       ],
     });
     namespace = await preview(mf, 'test', entries);

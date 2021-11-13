@@ -76,7 +76,7 @@ describe('worker', () => {
     const { query, request } = await bootstrap({
       binding: 'TEST2',
       plugins: [
-        { source: path.resolve(__dirname, '../src/plugins/plugin-json') },
+        { source: path.resolve(__dirname, '../src/plugins/plugin-metadata') },
       ],
       output: {
         list: { source: path.resolve(__dirname, '../src/plugins/plugin-list') },

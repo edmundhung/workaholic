@@ -134,7 +134,7 @@ export function makeGenerateCommand(): Command {
             { source: '../plugins/plugin-frontmatter' },
             { source: '../plugins/plugin-yaml' },
             { source: '../plugins/plugin-toml' },
-            { source: '../plugins/plugin-json' },
+            { source: '../plugins/plugin-metadata' },
           ],
       });
 
