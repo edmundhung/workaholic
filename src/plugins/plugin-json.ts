@@ -10,7 +10,7 @@ export const setupBuild: SetupBuildFunction = () => {
       const { metadata, ...data } = JSON.parse(entry.value);
 
       return {
-        key: entry.key.replace(/\.json$/, ''),
+        key: entry.key,
         value: JSON.stringify(data),
         metadata,
       };

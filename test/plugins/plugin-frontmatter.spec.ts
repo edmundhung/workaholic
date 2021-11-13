@@ -30,7 +30,7 @@ describe('plugin-frontmatter', () => {
     const query = createQuery(namespace);
     const { metadata } = data;
 
-    expect(await query('data', 'sample-markdown')).toEqual({
+    expect(await query('data', 'sample-markdown.md')).toEqual({
       value: `
 # Mulcet vincere
 

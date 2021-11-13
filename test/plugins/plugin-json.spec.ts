@@ -30,7 +30,7 @@ describe('plugin-json', () => {
     const query = createQuery(namespace);
     const { metadata, ...value } = data;
 
-    expect(await query('data', 'sample-json')).toEqual({
+    expect(await query('data', 'sample-json.json')).toEqual({
       value: JSON.stringify(value),
       metadata,
     });

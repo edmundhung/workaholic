@@ -8,12 +8,9 @@ export const setupBuild: SetupBuildFunction = () => {
         return entry;
       }
 
-      const { metadata, ...data } = TOML.parse(entry.value);
-
       return {
-        key: entry.key.replace(/\.toml$/, ''),
-        value: JSON.stringify(data),
-        metadata: metadata as any,
+        key: entry.key.replace(/\.toml$/, '.json'),
+        value: JSON.stringify(TOML.parse(entry.value)),
       };
     },
   };

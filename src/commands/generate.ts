@@ -131,11 +131,10 @@ export function makeGenerateCommand(): Command {
         plugins: workaholic.plugins
           ? await Promise.all(workaholic.plugins.map(plugin => resolvePlugin(root, plugin)))
           : [
-            { source: '../plugins/plugin-json' },
             { source: '../plugins/plugin-frontmatter' },
             { source: '../plugins/plugin-yaml' },
             { source: '../plugins/plugin-toml' },
-            { source: '../plugins/plugin-list' },
+            { source: '../plugins/plugin-json' },
           ],
       });
 

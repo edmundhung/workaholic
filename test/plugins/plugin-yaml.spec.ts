@@ -28,11 +28,10 @@ describe('plugin-yaml', () => {
 
   it('transforms data by parsing yaml content', async () => {
     const query = createQuery(namespace);
-    const { metadata, ...value } = data;
 
-    expect(await query('data', 'sample-yaml')).toEqual({
-      value: JSON.stringify(value),
-      metadata,
+    expect(await query('data', 'sample-yaml.json')).toEqual({
+      value: JSON.stringify(data),
+      metadata: null,
     });
   });
 });

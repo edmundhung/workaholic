@@ -9,7 +9,7 @@
   },
   {
     "key": "data/sample-json.json",
-    "value": "{\n  \"metadata\": {\n    \"title\": \"Lorem Ipsum\",\n    \"description\": \"Lorem markdownum timidumque putat. Ipse **reddit aderat luctus** enim tutam semine Tiberinaque oppositas non adhuc metaque ferant\"\n  },\n  \"text\": \"Phasellus finibus nunc quis leo convallis, eu pulvinar augue egestas\",\n  \"number\": -2120385380.6364622,\n  \"boolean\": true,\n  \"list\": [\n    61125266,\n    0.0\n  ],\n  \"arrayOfObject\": [\n    { \"foo\": \"bar\" }\n  ],\n  \"object\": {\n    \"date\": \"1970-01-01T00:00:00.000Z\",\n    \"list\": [\n      \"Maecenas fringilla massa non venenatis porta\"\n    ]\n  }\n}\n"
+    "value": "{\n  \"text\": \"Phasellus finibus nunc quis leo convallis, eu pulvinar augue egestas\",\n  \"number\": -2120385380.6364622,\n  \"boolean\": true,\n  \"list\": [\n    61125266,\n    0.0\n  ],\n  \"metadata\": {\n    \"title\": \"Lorem Ipsum\",\n    \"description\": \"Lorem markdownum timidumque putat. Ipse **reddit aderat luctus** enim tutam semine Tiberinaque oppositas non adhuc metaque ferant\"\n  },\n  \"arrayOfObject\": [\n    { \"foo\": \"bar\" }\n  ],\n  \"object\": {\n    \"date\": \"1970-01-01T00:00:00.000Z\",\n    \"list\": [\n      \"Maecenas fringilla massa non venenatis porta\"\n    ]\n  }\n}\n"
   },
   {
     "key": "data/sample-markdown.md",
@@ -21,6 +21,6 @@
   },
   {
     "key": "data/sample-yaml.yaml",
-    "value": "metadata:\n  title: Lorem Ipsum\n  description: >-\n    Lorem markdownum timidumque putat. Ipse **reddit aderat luctus** enim\n    tutam semine Tiberinaque oppositas non adhuc metaque ferant\ntext: Phasellus finibus nunc quis leo convallis, eu pulvinar augue egestas\nnumber: -2120385380.6364622\nboolean: true\nlist:\n- 61125266\n- 0\narrayOfObject:\n- foo: bar\nobject:\n  date: '1970-01-01T00:00:00.000Z'\n  list:\n  - Maecenas fringilla massa non venenatis porta\n"
+    "value": "text: Phasellus finibus nunc quis leo convallis, eu pulvinar augue egestas\nnumber: -2120385380.6364622\nboolean: true\nlist:\n- 61125266\n- 0\nmetadata:\n  title: Lorem Ipsum\n  description: >-\n    Lorem markdownum timidumque putat. Ipse **reddit aderat luctus** enim\n    tutam semine Tiberinaque oppositas non adhuc metaque ferant\narrayOfObject:\n- foo: bar\nobject:\n  date: '1970-01-01T00:00:00.000Z'\n  list:\n  - Maecenas fringilla massa non venenatis porta\n"
   }
 ]

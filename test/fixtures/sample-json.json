@@ -1,8 +1,4 @@
 {
-  "metadata": {
-    "title": "Lorem Ipsum",
-    "description": "Lorem markdownum timidumque putat. Ipse **reddit aderat luctus** enim tutam semine Tiberinaque oppositas non adhuc metaque ferant"
-  },
   "text": "Phasellus finibus nunc quis leo convallis, eu pulvinar augue egestas",
   "number": -2120385380.6364622,
   "boolean": true,
@@ -10,6 +6,10 @@
     61125266,
     0.0
   ],
+  "metadata": {
+    "title": "Lorem Ipsum",
+    "description": "Lorem markdownum timidumque putat. Ipse **reddit aderat luctus** enim tutam semine Tiberinaque oppositas non adhuc metaque ferant"
+  },
   "arrayOfObject": [
     { "foo": "bar" }
   ],

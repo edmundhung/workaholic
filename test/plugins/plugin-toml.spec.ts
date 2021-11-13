@@ -28,11 +28,10 @@ describe('plugin-toml', () => {
 
   it('transforms data by parsing toml content', async () => {
     const query = createQuery(namespace);
-    const { metadata, ...value } = data;
 
-    expect(await query('data', 'sample-toml')).toEqual({
-      value: JSON.stringify(value),
-      metadata,
+    expect(await query('data', 'sample-toml.json')).toEqual({
+      value: JSON.stringify(data),
+      metadata: null,
     });
   });
 });

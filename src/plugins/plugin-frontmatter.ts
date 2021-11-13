@@ -11,7 +11,7 @@ export const setupBuild: SetupBuildFunction = () => {
       const result = matter(entry.value);
 
       return {
-        key: entry.key.replace(/\.md$/, ''),
+        key: entry.key,
         value: result.content?.trim() ?? '',
         metadata: result.data,
       };

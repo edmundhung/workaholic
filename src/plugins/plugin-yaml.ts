@@ -8,12 +8,9 @@ export const setupBuild: SetupBuildFunction = () => {
         return entry;
       }
 
-      const { metadata, ...data } = yaml.load(entry.value) as any;
-
       return {
-        key: entry.key.replace(/\.(yaml|yml)$/, ''),
-        value: JSON.stringify(data),
-        metadata,
+        key: entry.key.replace(/\.(yaml|yml)$/, '.json'),
+        value: JSON.stringify(yaml.load(entry.value)),
       };
     },
   };
