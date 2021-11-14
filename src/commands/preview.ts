@@ -10,7 +10,7 @@ export default async function preview(mf: Miniflare, binding: string, entries: E
 
   await Promise.all(
     entries.map(entry =>
-      kvNamespace.put(entry.key, entry.value, { metadata: entry.metadata }),
+      kvNamespace.put(entry.key, entry.base64 ? Buffer.from(entry.value, 'base64').buffer : entry.value, { metadata: entry.metadata }),
     ),
   );
 
