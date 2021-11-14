@@ -4,6 +4,9 @@ export interface Entry {
   key: string;
   value: string;
   metadata?: Metadata;
+  base64?: boolean;
+  expiration?: number;
+  expiration_ttl?: number;
 }
 
 export interface Data {
