@@ -9,7 +9,7 @@ import createQuery from '../src/createQuery';
 import type { Options, Query } from '../src/types';
 
 async function bootstrap({ site, binding, config }: Partial<Options>) {
-  const script = await build({
+  const script = await generate({
     basename: site?.basename ?? '',
     binding,
     config,
@@ -19,7 +19,7 @@ async function bootstrap({ site, binding, config }: Partial<Options>) {
     buildCommand: '',
     kvNamespaces: [binding],
   });
-  const entries = await generate({
+  const entries = await build({
     source: path.resolve(__dirname, './fixtures'),
     config,
   });

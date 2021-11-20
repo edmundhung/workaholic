@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`commands supports generating entries based on the fixtures 1`] = `
+exports[`commands supports building entries based on the fixtures 1`] = `
 Array [
   Object {
     "base64": false,

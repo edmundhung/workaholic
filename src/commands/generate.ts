@@ -1,105 +1,98 @@
 import { Command } from 'commander';
 import * as esbuild from 'esbuild';
-import fs from 'fs';
 import path from 'path';
-import type { Build, Entry, Options } from '../types';
-import { getRelativePath, getWranglerConfig, getWranglerDirectory } from '../utils';
+import { getWranglerConfig, getWranglerDirectory } from '../utils';
 
-interface GenerateOptions {
-  source: string;
+interface GenerateWorkerOptions {
+  basename: string;
+  binding: string;
+  minify?: boolean;
   config?: string;
+  target?: string;
 }
 
-async function parseFile(root: string, filePath: string): Promise<Entry> {
-  const value = await fs.promises.readFile(filePath);
-  const key = getRelativePath(root, filePath);
-
+function workaholicSitePlugin(workerMatcher: RegExp, options: Pick<GenerateWorkerOptions, 'basename' | 'binding' | 'config'>): esbuild.Plugin {
   return {
-    key,
-    value: value.buffer,
+    name: 'workaholic-site',
+    setup(build: esbuild.PluginBuild) {
+      build.onResolve({ filter: workerMatcher }, args => {
+        return { namespace: 'workaholic-site', path: args.path };
+      });
+
+      build.onLoad({ namespace: 'workaholic-site', filter: workerMatcher }, async args => {
+          const file = args.path.replace(workerMatcher, '');
+          const contents = `
+            import { createRequestHandler } from ${JSON.stringify(file)};
+            ${options.config ? `import { setupQuery } from ${JSON.stringify(options.config)};` : ''}
+
+            const handleRequest = createRequestHandler(${options.binding}, {
+              basename: '${options.basename}',
+              ${options.config ? 'enhancer: setupQuery(),' : ''}
+            });
+
+            addEventListener('fetch', event => event.respondWith(handleRequest(event.request)));
+          `;
+
+          return {
+            contents: contents.trim().split('\n').map(line => line.trim()).join('\n'),
+            resolveDir: path.dirname(file),
+            loader: 'js',
+          };
+        }
+      );
+    }
   };
 }
 
-async function parseDirectory(directory: string): Promise<string[]> {
-  let list: string[] = [];
+export default async function generateWorker(options: GenerateWorkerOptions): Promise<string | null> {
+  const result = await esbuild.build({
+    entryPoints: [path.resolve(__dirname, '../../template/worker.ts?site')],
+    outfile: options.target,
+    write: !!options.target,
+    bundle: true,
+    minify: options.minify ?? false,
+    format: 'esm',
+    plugins: [
+      workaholicSitePlugin(/\?site$/, {
+        basename: options.basename,
+        binding: options.binding,
+        config: options.config,
+      }),
+    ],
+  });
 
-  for (const dirent of await fs.promises.readdir(directory, { withFileTypes: true })) {
-    if (dirent.isDirectory()) {
-      const paths = await parseDirectory(`${directory}/${dirent.name}`);
-
-      list.push(...paths);
-    } else if (dirent.isFile()) {
-      list.push(`${directory}/${dirent.name}`);
-    }
+  if (options.target) {
+    return null;
   }
 
-  return list;
-}
+  const [file] = result.outputFiles ?? [];
 
-function assignNamespace(namespace: string, entries: Entry[]): Entry[] {
-  return entries.map<Entry>(entry => ({ ...entry, key: `${namespace}://${entry.key}` }));
-}
+  if (!file) {
+    throw new Error('[Workaholic] Unknown error during generate');
+  }
 
-export default async function generate({ source, config = path.resolve(__dirname, '../defaultConfig') }: GenerateOptions): Promise<Entry[]> {
-  const files = await parseDirectory(source);
-  const entries = await Promise.all(files.map(file => parseFile(source, file)));
-  const build = initialiseBuild(config);
-  const result = await Promise.resolve(build(entries));
-
-  return Object.entries(result).flatMap(([namespace, entries]) => assignNamespace(namespace, entries));
-}
-
-async function resolveConfig(root: string, config: string): Promise<string> {
-  const target = path.resolve(root, './node_modules/.workaholic/', config);
-
-  await esbuild.build({
-    entryPoints: [config.startsWith('.') ? path.resolve(root, config) : config],
-    outfile: target,
-    format: 'cjs',
-    target: 'node12',
-  });
-
-  return target;
-}
-
-function initialiseBuild(config: string): Build {
-  return require(config).setupBuild();
-}
-
-function stringifyEntries(entries: Entry[]): string {
-  const result = entries.map(entry => {
-    if (typeof entry.value === 'string') {
-      return entry;
-    }
-
-    return {
-      ...entry,
-      value: Buffer.from(entry.value).toString('base64'),
-      base64: true,
-    };
-  });
-
-  return JSON.stringify(result, null, 2);
+  return file.text;
 }
 
 export function makeGenerateCommand(): Command {
   const command = new Command('generate');
 
   command
-    .description('Generate worker kv data')
+    .description('generate worker source')
     .argument('<output>', 'output file path')
-    .option('--source [path]', 'path of the source directory')
+    .option('--minify', 'Minify output', false)
     .action(async (output, options) => {
-      const cwd = process.cwd();
       const root = await getWranglerDirectory();
       const config = await getWranglerConfig(root);
       const workaholic = config.getWorkaholicOptions();
-      const entries = await generate({
-        source: path.resolve(root, options.source ? path.resolve(cwd, options.source) : workaholic.source),
-        config: await resolveConfig(root, workaholic.config),
-      });
 
-      fs.promises.writeFile(path.resolve(cwd, output), stringifyEntries(entries));
+      await generateWorker({
+        basename: workaholic.site?.basename ?? '/',
+        binding: workaholic.binding,
+        minify: options.minify,
+        config: workaholic.config,
+        target: path.resolve(process.cwd(), output),
+      });
     });
 
   return command;

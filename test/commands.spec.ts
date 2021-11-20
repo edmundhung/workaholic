@@ -2,7 +2,7 @@ import { Miniflare } from 'miniflare';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import path from 'path';
-import generate from '../src/commands/generate';
+import build from '../src/commands/build';
 import preview from '../src/commands/preview';
 import publish from '../src/commands/publish';
 import type { Entry } from '../src/types';
@@ -30,8 +30,8 @@ describe('commands', () => {
     server.close();
   });
 
-  it('supports generating entries based on the fixtures', async () => {
-    const entries = await generate({ source: path.resolve(__dirname, './fixtures') });
+  it('supports building entries based on the fixtures', async () => {
+    const entries = await build({ source: path.resolve(__dirname, './fixtures') });
 
     expect(entries.map(entry => encodeEntry(entry, 'utf-8'))).toMatchSnapshot();
   });
@@ -41,7 +41,7 @@ describe('commands', () => {
       script: `addEventListener("fetch", () => {});`,
       buildCommand: '',
     });
-    const fixtures = await generate({ source: path.resolve(__dirname, './fixtures') });
+    const fixtures = await build({ source: path.resolve(__dirname, './fixtures') });
     const namespace = await preview(mf, 'test', fixtures);
 
     for (const entry of fixtures) {
@@ -56,7 +56,7 @@ describe('commands', () => {
     const accountId = 'foo';
     const namespaceId = 'bar';
     const token = 'test-token';
-    const entries = await generate({ source: path.resolve(__dirname, './fixtures') });
+    const entries = await build({ source: path.resolve(__dirname, './fixtures') });
     const fixtures = entries.map(entry => encodeEntry(entry, 'base64'));
 
     server.use(

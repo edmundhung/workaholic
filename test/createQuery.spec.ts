@@ -1,7 +1,7 @@
 import { Miniflare, Response } from 'miniflare';
 import * as path from 'path';
 import preview from '../src/commands/preview';
-import generate from '../src/commands/generate';
+import build from '../src/commands/build';
 import createQuery from '../src/createQuery';
 import fixtures from './fixtures.json';
 import type { Entry } from '../src/types';
@@ -16,7 +16,7 @@ describe('createQuery', () => {
       buildCommand: '',
     });
 
-    fixtures = await generate({
+    fixtures = await build({
       source: path.resolve(__dirname, './fixtures'),
     });
     namespace = await preview(mf, 'test', fixtures);
