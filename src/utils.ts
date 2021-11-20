@@ -2,7 +2,7 @@ import TOML from '@iarna/toml';
 import path from 'path';
 import fs from 'fs';
 import findUp from 'find-up';
-import type { Entry, Config } from './types';
+import type { Entry, Options } from './types';
 
 export function getRelativePath(source: string, target: string): string {
   return target.replace(source, '').replace(/^\//, '');
@@ -54,14 +54,14 @@ export async function getWranglerConfig(root: string) {
 
       return preview ? kv.preview_id : kv.id;
     },
-    getWorkaholicConfig(): Config {
-      const Config = config['workaholic'] as any;
+    getWorkaholicOptions(): Options {
+      const options = config['workaholic'] as any;
 
-      if (!Config) {
-        throw new Error('[workaholic] config not found; Please initialise with `workaholic init`')
+      if (!options) {
+        throw new Error('[workaholic] options not found; Please initialise with `workaholic init`')
       }
 
-      return Config;
+      return options;
     },
   };
 }

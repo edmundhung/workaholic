@@ -3,7 +3,7 @@ import type { QueryEnhancer } from '../src/types';
 
 interface CreateRequestHandlerOptions {
   basename: string;
-  enhancers?: QueryEnhancer[];
+  enhancer?: QueryEnhancer;
 }
 
 function parseSearchParams(search: URLSearchParams): Record<string, string | string[]> {
@@ -18,7 +18,7 @@ function parseSearchParams(search: URLSearchParams): Record<string, string | str
    }, {});
 }
 
-export function createRequestHandler(KVNamespace: KVNamespace, { basename, enhancers = [] }: CreateRequestHandlerOptions) {
+export function createRequestHandler(KVNamespace: KVNamespace, { basename, enhancer }: CreateRequestHandlerOptions) {
   return async (request: Request): Promise<Response> => {
     let response: Response;
 
@@ -30,7 +30,7 @@ export function createRequestHandler(KVNamespace: KVNamespace, { basename, enhan
         const [namespace, ...paths] = pathname.slice(base.length).split('/');
         const path = paths.join('/');
         const options = parseSearchParams(searchParams);
-        const query = createQuery(KVNamespace, enhancers);
+        const query = createQuery(KVNamespace, enhancer);
         const result = await query(namespace, path, options);
 
         if (result !== null) {

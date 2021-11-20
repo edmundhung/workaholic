@@ -1,45 +1,17 @@
-import type { Handler, HandlerFactory, QueryEnhancer, Metadata, Data, Query } from './types';
+import type { Query, QueryEnhancer } from './types';
 
-const defaultEnhancer: QueryEnhancer<Data> = {
-  namespace: 'data',
-  handlerFactory: kvNamespace => async (namespace, slug): Promise<Data | null> => {
-    const data = await kvNamespace.getWithMetadata<Metadata>(`${namespace}/${slug}`, 'text');
+function createQuery(kvNamespace: KVNamespace, enhancer?: QueryEnhancer): Query {
+  function query(namespace: string, slug: string, options: Record<string, any> = {}): Promise<any> {
+    const key = `${namespace}://${slug}`;
 
-    if (!data.value && !data.metadata) {
-      return null;
+    if (options.metadata) {
+      return kvNamespace.getWithMetadata(key, options.type);
     }
 
-    return data;
-  },
-};
-
-
-function createQuery(kvNamespace: KVNamespace, enhancers: QueryEnhancer[] = []): Query {
-  const map = new Map<string, Handler>();
-
-  function register(namespace: string, handlerFactory: HandlerFactory) {
-    if (map.has(namespace)) {
-      throw new Error(`[Workaholic] Namespace collision found: ${namespace}`);
-    }
-
-    map.set(namespace, handlerFactory(kvNamespace));
+    return kvNamespace.get(key, options.type);
   }
 
-  async function query(namespace: string, path: string, options?: Record<string, any>): Promise<any> {
-    const handler = map.get(namespace);
-
-    if (typeof handler === 'undefined') {
-      return null;
-    }
-
-    return handler(namespace, path, options ?? {});
-  }
-
-  for (const enhancer of (enhancers.length > 0 ? enhancers : [defaultEnhancer])) {
-    register(enhancer.namespace, enhancer.handlerFactory);
-  }
-
-  return query;
+  return enhancer?.(query) ?? query;
 }
 
 export default createQuery;

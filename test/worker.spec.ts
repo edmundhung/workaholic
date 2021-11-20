@@ -6,13 +6,13 @@ import build from '../src/commands/build';
 import generate from '../src/commands/generate';
 import preview from '../src/commands/preview';
 import createQuery from '../src/createQuery';
-import type { Config, Query } from '../src/types';
+import type { Options, Query } from '../src/types';
 
-async function bootstrap({ site, binding, plugins, output }: Partial<Config>) {
+async function bootstrap({ site, binding, config }: Partial<Options>) {
   const script = await build({
     basename: site?.basename ?? '',
     binding,
-    output,
+    config,
   });
   const mf = new Miniflare({
     script,
@@ -21,18 +21,13 @@ async function bootstrap({ site, binding, plugins, output }: Partial<Config>) {
   });
   const entries = await generate({
     source: path.resolve(__dirname, './fixtures'),
-    plugins,
-    output,
+    config,
   });
   const kvNamespace = await preview(mf, binding, entries);
-  const enhancers = !output ? [] : Object
-    .entries(output)
-    .map(([namespace, config]) => [namespace, require(config.source)])
-    .filter(([_, plugin]) => typeof plugin.setupQuery !== 'undefined')
-    .map(([namespace, plugin]) => ({ namespace, handlerFactory: plugin.setupQuery() }));
+  const enhancer = config ? require(config).setupQuery() : null;
 
   return {
-    query: createQuery(kvNamespace, enhancers),
+    query: enhancer ? createQuery(kvNamespace, enhancer) : createQuery(kvNamespace),
     async request(path: string, init?: RequestInit): [number, any] {
       const response = await mf.dispatchFetch(`http://test.workaholic.site${path}`, init);
 
@@ -65,28 +60,25 @@ describe('worker', () => {
       binding: 'TEST1',
     });
 
-    expect(await request('/data/sample-json.json')).toEqual([200, await query('data', 'sample-json.json')]);
-    expect(await request('/data/foo/de-hostis-habetur.md')).toEqual([200, await query('data', 'foo/de-hostis-habetur.md')]);
-    expect(await request('/data')).toEqual([404, null]);
+    expect(await request('/assets/sample-json.json')).toEqual([200, await query('assets', 'sample-json.json')]);
+    expect(await request('/assets/sample-json.json')).toEqual([200, await query('assets', 'sample-json.json', { type: 'text' })]);
+    expect(await request('/assets/sample-json.json?type=json')).toEqual([200, await query('assets', 'sample-json.json', { type: 'json' })]);
+    expect(await request('/assets/foo/de-hostis-habetur.md')).toEqual([200, await query('assets', 'foo/de-hostis-habetur.md')]);
+    expect(await request('/assets')).toEqual([404, null]);
     expect(await request('/random')).toEqual([404, null]);
-    expect(await request('/data/foo/bar/')).toEqual([404, null]);
+    expect(await request('/assets/foo/bar/')).toEqual([404, null]);
   });
 
-  it('works with plugins', async () => {
+  it('works with custom config', async () => {
     const { query, request } = await bootstrap({
       binding: 'TEST2',
-      plugins: [
-        { source: path.resolve(__dirname, '../src/plugins/plugin-metadata') },
-      ],
-      output: {
-        list: { source: path.resolve(__dirname, '../src/plugins/plugin-list') },
-      },
+      config: path.resolve(__dirname, './fixtures/test-config.js'),
     });
 
-    expect(await request('/list')).toEqual([200, await query('list', '')]);
-    expect(await request('/list/foo')).toEqual([200, await query('list', 'foo')]);
-    expect(await request('/list/foo?includeSubfolder=yes')).toEqual([200, await query('list', 'foo', { includeSubfolder: true })]);
-    expect(await request('/list/bar')).toEqual([404, null]);
+    expect(await request('/assets/sample-json.json')).toEqual([404, null]);
+    expect(await request('/test/sample-json.json')).toEqual([200, await query('test', 'sample-json.json')]);
+    expect(await request('/foo/de-hostis-habetur.md')).toEqual([200, await query('foo', 'de-hostis-habetur.md')]);
+    expect(await request('/foo/de-hostis-habetur.md')).toEqual([200, await query('test', 'foo/de-hostis-habetur.md')]);
   });
 
   it('works with custom basename', async () => {
@@ -95,8 +87,8 @@ describe('worker', () => {
       binding: 'TEST3',
     });
 
-    expect(await request('/api/data/sample-json.json')).toEqual([200, await query('data', 'sample-json.json')]);
-    expect(await request('/api/data')).toEqual([404, null]);
+    expect(await request('/api/assets/sample-json.json')).toEqual([200, await query('assets', 'sample-json.json')]);
+    expect(await request('/api/assets')).toEqual([404, null]);
   });
 
   it('forwards the request to the origin if the request url does not match the basename', async () => {

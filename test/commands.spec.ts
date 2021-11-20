@@ -5,7 +5,15 @@ import path from 'path';
 import generate from '../src/commands/generate';
 import preview from '../src/commands/preview';
 import publish from '../src/commands/publish';
-import fixtures from './fixtures.json';
+import type { Entry } from '../src/types';
+
+function encodeEntry(entry: Entry, encoding: string): Entry {
+  return {
+    ...entry,
+    value: Buffer.from(entry.value).toString(encoding),
+    base64: encoding === 'base64',
+  };
+}
 
 describe('commands', () => {
   const server = setupServer();
@@ -23,7 +31,9 @@ describe('commands', () => {
   });
 
   it('supports generating entries based on the fixtures', async () => {
-    expect(await generate({ source: path.resolve(__dirname, './fixtures') })).toEqual(fixtures);
+    const entries = await generate({ source: path.resolve(__dirname, './fixtures') });
+
+    expect(entries.map(entry => encodeEntry(entry, 'utf-8'))).toMatchSnapshot();
   });
 
   it('supports previewing entries on miniflare', async () => {
@@ -31,11 +41,12 @@ describe('commands', () => {
       script: `addEventListener("fetch", () => {});`,
       buildCommand: '',
     });
+    const fixtures = await generate({ source: path.resolve(__dirname, './fixtures') });
     const namespace = await preview(mf, 'test', fixtures);
 
     for (const entry of fixtures) {
       expect(await namespace.getWithMetadata(entry.key)).toEqual({
-        value: entry.value,
+        value: Buffer.from(entry.value).toString('utf-8'),
         metadata: entry.metadata ?? null,
       });
     }
@@ -45,6 +56,8 @@ describe('commands', () => {
     const accountId = 'foo';
     const namespaceId = 'bar';
     const token = 'test-token';
+    const entries = await generate({ source: path.resolve(__dirname, './fixtures') });
+    const fixtures = entries.map(entry => encodeEntry(entry, 'base64'));
 
     server.use(
       rest.put('https://api.cloudflare.com/client/v4/accounts/:accountId/storage/kv/namespaces/:namespaceId/bulk', (req, res, ctx) => {
@@ -62,7 +75,6 @@ describe('commands', () => {
         );
       }),
     );
-
     const response = await publish(fixtures, { accountId, namespaceId, token });
 
     expect(response.status).toBe(200);

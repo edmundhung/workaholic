@@ -10,7 +10,7 @@ export default async function preview(mf: Miniflare, binding: string, entries: E
 
   await Promise.all(
     entries.map(entry =>
-      kvNamespace.put(entry.key, entry.base64 ? Buffer.from(entry.value, 'base64').buffer : entry.value, { metadata: entry.metadata }),
+      kvNamespace.put(entry.key, typeof entry.value !== 'string' ? Buffer.from(entry.value).buffer : entry.value, { metadata: entry.metadata }),
     ),
   );
 
@@ -38,7 +38,7 @@ export function makePreviewCommand(): Command {
       });
       const entries = await parseData(path.resolve(process.cwd(), source));
       const config = await getWranglerConfig(root);
-      const options = config.getWorkaholicConfig();
+      const options = config.getWorkaholicOptions();
       await preview(mf, options.binding, entries);
       console.log('[workaholic] KV persisted on Miniflare');
     });

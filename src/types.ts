@@ -2,7 +2,7 @@ export type Metadata = Record<string, any>;
 
 export interface Entry {
   key: string;
-  value: string;
+  value: string | ArrayBuffer;
   metadata?: Metadata;
   base64?: boolean;
   expiration?: number;
@@ -14,45 +14,27 @@ export interface Data {
   metadata: Metadata | null;
 }
 
-export type Query<Payload = any> = (namespace: string, path: string, options?: Record<string, any>) => Promise<Payload | null>;
+export type Query<Payload = any> = (namespace: string, slug: string, options?: Record<string, any>) => Promise<Payload | null>;
 
-export interface Config {
+export interface Options {
   binding: string;
   source: string;
-  output?: Record<string, PluginConfig>;
-  site?: SiteConfig;
-  plugins?: Array<PluginConfig>
+  config: string;
+  site?: SiteOptions;
 }
 
-export interface SiteConfig {
+export interface SiteOptions {
   basename?: string;
-}
-
-export interface PluginConfig {
-  source: string;
-  options?: Record<string, any>;
 }
 
 export type SetupBuildFunction = (options?: Record<string, any>) => Build;
 
 export type MaybePromise<T> = T | Promise<T>;
 
-export interface Build {
-  transform?: (entry: Entry) => MaybePromise<Entry | Entry[]>;
-  index?: (entries: Entry[]) => MaybePromise<Entry[]>;
-}
-
-export interface Handler<Payload = any> {
-  (namespace: string, path: string, options: Record<string, any>): Promise<Payload | null>;
-}
-
-export interface HandlerFactory<Payload = any> {
-  (kvNamespace: KVNamespace): Handler<Payload>;
-}
+export type Build = (entries: Entry[]) => MaybePromise<Record<string, Entry[]>>;
 
 export interface QueryEnhancer<Payload = any> {
-  namespace: string;
-  handlerFactory: HandlerFactory<Payload>;
+  (query: Query): Query<Payload>;
 }
 
-export type SetupQueryFunction<Payload = any> = (options?: Record<string, any>) => HandlerFactory<Payload>;
+export type SetupQueryFunction<Payload = any> = (options?: Record<string, any>) => QueryEnhancer<Payload>;
