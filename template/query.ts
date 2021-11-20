@@ -1,0 +1,1 @@
+export { createQuery } from '../src';

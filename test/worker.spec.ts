@@ -3,7 +3,7 @@ import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import path from 'path';
 import { build } from '../src/commands/build';
-import { generateWorker } from '../src/commands/generate';
+import { generateWorker, generateQuery } from '../src/commands/generate';
 import { preview } from '../src/commands/preview';
 import createQuery from '../src/createQuery';
 import type { Options, Query } from '../src/types';
@@ -14,6 +14,14 @@ async function bootstrap({ site, binding, config }: Partial<Options>) {
     binding,
     config,
   });
+  const querySource = path.resolve(__dirname, `../node_modules/.workaholic/${Math.random().toString(36).slice(2)}.js`);
+  await generateQuery({
+    binding,
+    config,
+    format: 'cjs',
+    target: querySource,
+  });
+
   const mf = new Miniflare({
     script,
     buildCommand: '',
@@ -23,11 +31,11 @@ async function bootstrap({ site, binding, config }: Partial<Options>) {
     source: path.resolve(__dirname, './fixtures'),
     config,
   });
-  const kvNamespace = await preview(mf, binding, entries);
-  const enhancer = config ? require(config).setupQuery() : null;
+
+  globalThis[binding] = await preview(mf, binding, entries);
 
   return {
-    query: enhancer ? createQuery(kvNamespace, enhancer) : createQuery(kvNamespace),
+    query: require(querySource).default,
     async request(path: string, init?: RequestInit): [number, any] {
       const response = await mf.dispatchFetch(`http://test.workaholic.site${path}`, init);
 
