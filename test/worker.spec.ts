@@ -2,14 +2,14 @@ import { Miniflare } from 'miniflare';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import path from 'path';
-import build from '../src/commands/build';
-import generate from '../src/commands/generate';
-import preview from '../src/commands/preview';
+import { build } from '../src/commands/build';
+import { generateWorker } from '../src/commands/generate';
+import { preview } from '../src/commands/preview';
 import createQuery from '../src/createQuery';
 import type { Options, Query } from '../src/types';
 
 async function bootstrap({ site, binding, config }: Partial<Options>) {
-  const script = await generate({
+  const script = await generateWorker({
     basename: site?.basename ?? '',
     binding,
     config,

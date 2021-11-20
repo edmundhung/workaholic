@@ -4,7 +4,7 @@ import path from 'path';
 import { Entry } from '../types';
 import { parseData, getWranglerConfig, getWranglerDirectory } from '../utils';
 
-export default async function publish(entries: Entry[], { accountId, namespaceId, token }: { accountId: string, namespaceId: string, token: string }): Promise<Response> {
+export async function publish(entries: Entry[], { accountId, namespaceId, token }: { accountId: string, namespaceId: string, token: string }): Promise<Response> {
   return fetch(
     `https://api.cloudflare.com/client/v4/accounts/${accountId}/storage/kv/namespaces/${namespaceId}/bulk`,
     {
@@ -18,7 +18,7 @@ export default async function publish(entries: Entry[], { accountId, namespaceId
   );
 }
 
-export function makePublishCommand(): Command {
+export default function makePublishCommand(): Command {
   const command = new Command('publish');
 
   command

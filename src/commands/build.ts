@@ -40,7 +40,7 @@ function assignNamespace(namespace: string, entries: Entry[]): Entry[] {
   return entries.map<Entry>(entry => ({ ...entry, key: `${namespace}://${entry.key}` }));
 }
 
-export default async function build({ source, config = path.resolve(__dirname, '../defaultConfig') }: BuildOptions): Promise<Entry[]> {
+export async function build({ source, config = path.resolve(__dirname, '../defaultConfig') }: BuildOptions): Promise<Entry[]> {
   const files = await parseDirectory(source);
   const entries = await Promise.all(files.map(file => parseFile(source, file)));
   const build = initialiseBuild(config);
@@ -82,7 +82,7 @@ function stringifyEntries(entries: Entry[]): string {
   return JSON.stringify(result, null, 2);
 }
 
-export function makeBuildCommand(): Command {
+export default function makeBuildCommand(): Command {
   const command = new Command('build');
 
   command

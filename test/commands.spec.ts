@@ -2,9 +2,9 @@ import { Miniflare } from 'miniflare';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import path from 'path';
-import build from '../src/commands/build';
-import preview from '../src/commands/preview';
-import publish from '../src/commands/publish';
+import { build } from '../src/commands/build';
+import { preview } from '../src/commands/preview';
+import { publish } from '../src/commands/publish';
 import type { Entry } from '../src/types';
 
 function encodeEntry(entry: Entry, encoding: string): Entry {

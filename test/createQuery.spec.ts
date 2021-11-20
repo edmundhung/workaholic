@@ -1,7 +1,7 @@
 import { Miniflare, Response } from 'miniflare';
 import * as path from 'path';
-import preview from '../src/commands/preview';
-import build from '../src/commands/build';
+import { preview } from '../src/commands/preview';
+import { build } from '../src/commands/build';
 import createQuery from '../src/createQuery';
 import fixtures from './fixtures.json';
 import type { Entry } from '../src/types';

@@ -44,7 +44,7 @@ function workaholicSitePlugin(workerMatcher: RegExp, options: Pick<GenerateWorke
   };
 }
 
-export default async function generateWorker(options: GenerateWorkerOptions): Promise<string | null> {
+export async function generateWorker(options: GenerateWorkerOptions): Promise<string | null> {
   const result = await esbuild.build({
     entryPoints: [path.resolve(__dirname, '../../template/worker.ts?site')],
     outfile: options.target,
@@ -74,7 +74,7 @@ export default async function generateWorker(options: GenerateWorkerOptions): Pr
   return file.text;
 }
 
-export function makeGenerateCommand(): Command {
+export default function makeGenerateCommand(): Command {
   const command = new Command('generate');
 
   command

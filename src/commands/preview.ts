@@ -5,7 +5,7 @@ import rimraf from 'rimraf';
 import { Entry } from '../types';
 import { parseData, getWranglerConfig, getWranglerDirectory } from '../utils';
 
-export default async function preview(mf: Miniflare, binding: string, entries: Entry[]): Promise<KVNamespace> {
+export async function preview(mf: Miniflare, binding: string, entries: Entry[]): Promise<KVNamespace> {
   const kvNamespace = await mf.getKVNamespace(binding);
 
   await Promise.all(
@@ -17,7 +17,7 @@ export default async function preview(mf: Miniflare, binding: string, entries: E
   return kvNamespace;
 }
 
-export function makePreviewCommand(): Command {
+export default function makePreviewCommand(): Command {
   const command = new Command('preview');
 
   command
